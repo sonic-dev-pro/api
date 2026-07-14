@@ -2,11 +2,13 @@
    المطور الوحيد:
    - محمد (SONIC DEV) 🇲🇦
    حقوق التطوير محفوظة بالكامل
-   ⃟꙰⃢ 𝚂𝙾𝙽𝙸𝙲➥𝙱ᝪᝨ ❯ |‌⃟🇲🇦‌|‌
 */
 
 import express from 'express';
 import axios from 'axios';
+import crypto from 'crypto';
+
+const router = express.Router();
 
 // ─── دالة التحقق من وجود نص عربي ──────────────────────────────────────
 function hasArabic(text) {
@@ -26,28 +28,25 @@ async function translateToEnglish(text) {
             },
             timeout: 8000
         });
-        if (data && data[0]) {
-            return data[0].map(item => item[0]).join('');
-        }
-        return text;
+        return data[0].map(item => item[0]).join('');
     } catch (e) {
         console.log('Translation error:', e.message);
         return text;
     }
 }
 
-// ─── الدالة الأساسية ──────────────────────────────────────────────────
+// ─── الدالة الأساسية لمعالجة الصورة ──────────────────────────────────
 async function processImage(imageBuffer, mimeType, prompt) {
-    // 1. ترجمة النص إذا كان عربياً
+    // ترجمة النص إذا كان عربياً
     let finalPrompt = prompt;
     if (hasArabic(prompt)) {
         finalPrompt = await translateToEnglish(prompt);
     }
 
-    // 2. تحويل الصورة إلى base64
+    // تحويل الصورة إلى base64
     const base64Image = `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
 
-    // 3. تحضير الـ payload
+    // تحضير الـ payload
     const payload = {
         prompt: finalPrompt,
         input_image: base64Image,
@@ -56,10 +55,10 @@ async function processImage(imageBuffer, mimeType, prompt) {
         width: 576,
         height: 1024,
         mode: 'standard',
-        client_request_id: Date.now().toString() + Math.random().toString(36).substring(2, 8)
+        client_request_id: crypto.randomUUID(),
     };
 
-    // 4. إرسال الطلب إلى Raphael.app
+    // إرسال الطلب إلى Raphael.app
     const response = await axios.post('https://raphael.app/api/ai-image-editor', payload, {
         headers: {
             'Content-Type': 'application/json',
@@ -70,22 +69,12 @@ async function processImage(imageBuffer, mimeType, prompt) {
         timeout: 60000,
     });
 
-    // 5. استخراج النتيجة
-    const responseText = response.data;
-    const lines = responseText.trim().split('\n').filter(line => line.trim());
-    
-    if (lines.length === 0) {
-        throw new Error('لم يتم استلام رد من الخادم');
-    }
-
+    // استخراج النتيجة
+    const lines = response.data.trim().split('\n');
     const lastLine = JSON.parse(lines[lines.length - 1]);
 
     if (lastLine.status !== 'complete') {
-        throw new Error(`حالة غير مكتملة: ${lastLine.status || 'unknown'}`);
-    }
-
-    if (!lastLine.data || !lastLine.data.url) {
-        throw new Error('لم يتم العثور على رابط النتيجة');
+        throw new Error('فشل تعديل الصورة أو أنها لا تزال قيد المعالجة');
     }
 
     const resultUrl = `https://raphael.app${lastLine.data.url}`;
@@ -101,10 +90,7 @@ async function processImage(imageBuffer, mimeType, prompt) {
     };
 }
 
-// ─── إنشاء Router ──────────────────────────────────────────────────────
-const router = express.Router();
-
-// ─── GET Endpoint ────────────────────────────────────────────────────
+// ─── GET Endpoint (صورة عبر رابط) ────────────────────────────────────
 router.get('/', async (req, res) => {
     try {
         const { imageUrl, prompt } = req.query;
@@ -132,10 +118,6 @@ router.get('/', async (req, res) => {
         const mimeType = imageResponse.headers['content-type'] || 'image/jpeg';
         const imageBuffer = Buffer.from(imageResponse.data);
 
-        if (imageBuffer.length === 0) {
-            throw new Error('الصورة فارغة أو لا يمكن تحميلها');
-        }
-
         const result = await processImage(imageBuffer, mimeType, prompt);
         result.meta = {
             timestamp: new Date().toISOString()
@@ -147,13 +129,12 @@ router.get('/', async (req, res) => {
         console.error('AI Image Editor Error:', error.message);
         res.status(500).json({
             success: false,
-            error: error.message || 'حدث خطأ داخلي في الخادم',
-            code: error.code || 'UNKNOWN'
+            error: error.message || 'حدث خطأ داخلي في الخادم'
         });
     }
 });
 
-// ─── POST Endpoint ───────────────────────────────────────────────────
+// ─── POST Endpoint (استقبال Base64 أو رابط) ─────────────────────────
 router.post('/', async (req, res) => {
     try {
         const { image, imageUrl, mimeType, prompt } = req.body;
@@ -169,13 +150,10 @@ router.post('/', async (req, res) => {
         let finalMimeType = mimeType || 'image/jpeg';
 
         if (image) {
-            // استقبال Base64 مباشرة
+            // استقبال Base64
             imageBuffer = Buffer.from(image, 'base64');
-            if (imageBuffer.length === 0) {
-                throw new Error('البيانات المرسلة فارغة أو غير صالحة');
-            }
         } else if (imageUrl) {
-            // تحميل من رابط
+            // استقبال رابط
             const imageResponse = await axios.get(imageUrl, {
                 responseType: 'arraybuffer',
                 timeout: 30000
@@ -185,7 +163,7 @@ router.post('/', async (req, res) => {
         } else {
             return res.status(400).json({
                 success: false,
-                error: 'يجب إرسال إما image (Base64) أو imageUrl (رابط)'
+                error: 'يجب إرسال إما image (base64) أو imageUrl (رابط)'
             });
         }
 
@@ -200,13 +178,11 @@ router.post('/', async (req, res) => {
         console.error('AI Image Editor Error:', error.message);
         res.status(500).json({
             success: false,
-            error: error.message || 'حدث خطأ داخلي في الخادم',
-            code: error.code || 'UNKNOWN'
+            error: error.message || 'حدث خطأ داخلي في الخادم'
         });
     }
 });
 
-// ─── تصدير module ──────────────────────────────────────────────────────
 export default {
     path: '/api/ai-image',
     name: 'AI Image Editor',
