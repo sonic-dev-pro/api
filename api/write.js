@@ -28,26 +28,37 @@ app.get('/api/write', async (req, res) => {
         const encodedText = encodeURIComponent(text);
         const externalApiUrl = `https://apis.xditya.me/write?text=${encodedText}`;
 
-        // جلب الصورة كـ arraybuffer
+        // جلب الصورة مع إرسال Headers تمنع الـ Rate Limit والـ 429 Block
         const response = await axios.get(externalApiUrl, {
             responseType: 'arraybuffer',
-            timeout: 20000 
+            timeout: 20000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
+                'Referer': 'https://apis.xditya.me/',
+                'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+                'Sec-Ch-Ua-Mobile': '?0',
+                'Sec-Ch-Ua-Platform': '"Windows"',
+                'Sec-Fetch-Dest': 'image',
+                'Sec-Fetch-Mode': 'no-cors',
+                'Sec-Fetch-Site': 'cross-site'
+            }
         });
 
-        // ⚠️ السر هنا: نخبر المتصفح أو البوت أن هذه صورة مباشرة وليست صفحة JSON
+        // إرسال الصورة مباشرة للمتصفح أو البوت
         res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'public, max-age=86400'); // كاش لتسريع الطلبات المتكررة
+        res.setHeader('Cache-Control', 'public, max-age=86400'); // تخزين مؤقت لتقليل الطلبات على الـ API الأساسي
 
-        // إرسال الـ Buffer مباشرة كصورة
         return res.send(Buffer.from(response.data));
 
     } catch (error) {
         console.error('API Write Error:', error);
-        // في حال حدوث خطأ فقط نرجع JSON يوضح المشكلة
+        
         res.setHeader('Content-Type', 'application/json');
         return res.status(500).json({
             status: false,
-            message: '❌ حدث خطأ أثناء معالجة الصورة.',
+            message: '❌ حدث خطأ أثناء معالجة الصورة (ربما ضغط كبير على السيرفر الأساسي).',
             error: error.message || error
         });
     }
