@@ -1,5 +1,5 @@
 /**
- * 📝 Write Text on Paper API — كود كتابة نص على ورق بالذكاء الاصطناعي
+ * 📝 Write Text on Paper API — كود كتابة نص على ورق وإرساله كصورة مباشرة
  * ⃟꙰⃢ 𝚂𝙾𝙽𝙸𝙲➥𝙱ᝪᝨ ❯ |‌⃟🇲🇦‌|‌
  * 👤 المالك والمطور الوحيد: 𝑺𝑶𝑵𝑰𝑪 𝑫𝑬𝑽⃢҉ ســونـيــڪ (محمد)
  * 👤 المطور الثانوي: Zyro core (الياس) 🦇
@@ -13,46 +13,41 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// يدعم كلاً من الـ GET لإظهار الواجهة والتجربة، والـ POST للاستدعاء البرمجي
 app.get('/api/write', async (req, res) => {
     try {
         const text = req.query.text;
         
         if (!text) {
-            return res.status(200).json({
+            return res.status(400).json({
                 status: false,
                 message: '⚠️ يرجى تزويد النص المطلوب كتابته عبر المعامل "text".',
-                example: '/api/write?text=Sonic Bot is here'
+                example: '/api/write?text=Sonic Bot'
             });
         }
 
         const encodedText = encodeURIComponent(text);
         const externalApiUrl = `https://apis.xditya.me/write?text=${encodedText}`;
 
+        // جلب الصورة كـ arraybuffer
         const response = await axios.get(externalApiUrl, {
             responseType: 'arraybuffer',
             timeout: 20000 
         });
 
-        const imageBase64 = Buffer.from(response.data).toString('base64');
-        const finalImageUri = `data:image/png;base64,${imageBase64}`;
+        // ⚠️ السر هنا: نخبر المتصفح أو البوت أن هذه صورة مباشرة وليست صفحة JSON
+        res.setHeader('Content-Type', 'image/png');
+        res.setHeader('Cache-Control', 'public, max-age=86400'); // كاش لتسريع الطلبات المتكررة
 
-        return res.status(200).json({
-            status: true,
-            developer: '𝑺𝑶𝑵𝑰𝑪 𝑫𝑬𝑽⃢҉ ســونـيــڪ (محمد) & Zyro core (الياس)',
-            source_channel: 'https://whatsapp.com/channel/0029VbCferaKLaHtHkyEVe1z',
-            result: {
-                text: text,
-                image_url: externalApiUrl, 
-                image_base64: finalImageUri 
-            }
-        });
+        // إرسال الـ Buffer مباشرة كصورة
+        return res.send(Buffer.from(response.data));
 
     } catch (error) {
         console.error('API Write Error:', error);
+        // في حال حدوث خطأ فقط نرجع JSON يوضح المشكلة
+        res.setHeader('Content-Type', 'application/json');
         return res.status(500).json({
             status: false,
-            message: '❌ حدث خطأ داخلي أثناء محاولة معالجة النص.',
+            message: '❌ حدث خطأ أثناء معالجة الصورة.',
             error: error.message || error
         });
     }
