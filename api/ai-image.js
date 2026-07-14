@@ -7,7 +7,6 @@
 
 import express from 'express';
 import axios from 'axios';
-import crypto from 'crypto';
 
 // ─── دالة التحقق من وجود نص عربي ──────────────────────────────────────
 function hasArabic(text) {
@@ -25,16 +24,19 @@ async function translateToEnglish(text) {
                 dt: 't',
                 q: text
             },
-            timeout: 10000
+            timeout: 8000
         });
-        return data[0].map(item => item[0]).join('');
+        if (data && data[0]) {
+            return data[0].map(item => item[0]).join('');
+        }
+        return text;
     } catch (e) {
         console.log('Translation error:', e.message);
         return text;
     }
 }
 
-// ─── الدالة الأساسية لمعالجة الصورة ──────────────────────────────────
+// ─── الدالة الأساسية ──────────────────────────────────────────────────
 async function processImage(imageBuffer, mimeType, prompt) {
     // 1. ترجمة النص إذا كان عربياً
     let finalPrompt = prompt;
@@ -49,12 +51,12 @@ async function processImage(imageBuffer, mimeType, prompt) {
     const payload = {
         prompt: finalPrompt,
         input_image: base64Image,
-        input_image_mime_type: mimeType,
-        input_image_extension: mimeType.split('/')[1] || 'webp',
+        input_image_mime_type: mimeType || 'image/jpeg',
+        input_image_extension: (mimeType || 'image/jpeg').split('/')[1] || 'jpeg',
         width: 576,
         height: 1024,
         mode: 'standard',
-        client_request_id: crypto.randomUUID(),
+        client_request_id: Date.now().toString() + Math.random().toString(36).substring(2, 8)
     };
 
     // 4. إرسال الطلب إلى Raphael.app
@@ -69,11 +71,21 @@ async function processImage(imageBuffer, mimeType, prompt) {
     });
 
     // 5. استخراج النتيجة
-    const lines = response.data.trim().split('\n');
+    const responseText = response.data;
+    const lines = responseText.trim().split('\n').filter(line => line.trim());
+    
+    if (lines.length === 0) {
+        throw new Error('لم يتم استلام رد من الخادم');
+    }
+
     const lastLine = JSON.parse(lines[lines.length - 1]);
 
     if (lastLine.status !== 'complete') {
-        throw new Error('فشل تعديل الصورة أو أنها لا تزال قيد المعالجة');
+        throw new Error(`حالة غير مكتملة: ${lastLine.status || 'unknown'}`);
+    }
+
+    if (!lastLine.data || !lastLine.data.url) {
+        throw new Error('لم يتم العثور على رابط النتيجة');
     }
 
     const resultUrl = `https://raphael.app${lastLine.data.url}`;
@@ -92,7 +104,7 @@ async function processImage(imageBuffer, mimeType, prompt) {
 // ─── إنشاء Router ──────────────────────────────────────────────────────
 const router = express.Router();
 
-// ─── GET Endpoint (صورة عبر رابط) ────────────────────────────────────
+// ─── GET Endpoint ────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
     try {
         const { imageUrl, prompt } = req.query;
@@ -120,6 +132,10 @@ router.get('/', async (req, res) => {
         const mimeType = imageResponse.headers['content-type'] || 'image/jpeg';
         const imageBuffer = Buffer.from(imageResponse.data);
 
+        if (imageBuffer.length === 0) {
+            throw new Error('الصورة فارغة أو لا يمكن تحميلها');
+        }
+
         const result = await processImage(imageBuffer, mimeType, prompt);
         result.meta = {
             timestamp: new Date().toISOString()
@@ -131,22 +147,16 @@ router.get('/', async (req, res) => {
         console.error('AI Image Editor Error:', error.message);
         res.status(500).json({
             success: false,
-            error: error.message || 'حدث خطأ داخلي في الخادم'
+            error: error.message || 'حدث خطأ داخلي في الخادم',
+            code: error.code || 'UNKNOWN'
         });
     }
 });
 
-// ─── POST Endpoint (استقبال Base64 مباشرة) ──────────────────────────
+// ─── POST Endpoint ───────────────────────────────────────────────────
 router.post('/', async (req, res) => {
     try {
-        const { image, mimeType, prompt } = req.body;
-
-        if (!image) {
-            return res.status(400).json({
-                success: false,
-                error: 'يجب إرسال حقل image (base64) أو imageUrl (رابط)'
-            });
-        }
+        const { image, imageUrl, mimeType, prompt } = req.body;
 
         if (!prompt) {
             return res.status(400).json({
@@ -155,9 +165,29 @@ router.post('/', async (req, res) => {
             });
         }
 
-        // تحويل base64 إلى Buffer
-        const imageBuffer = Buffer.from(image, 'base64');
-        const finalMimeType = mimeType || 'image/jpeg';
+        let imageBuffer;
+        let finalMimeType = mimeType || 'image/jpeg';
+
+        if (image) {
+            // استقبال Base64 مباشرة
+            imageBuffer = Buffer.from(image, 'base64');
+            if (imageBuffer.length === 0) {
+                throw new Error('البيانات المرسلة فارغة أو غير صالحة');
+            }
+        } else if (imageUrl) {
+            // تحميل من رابط
+            const imageResponse = await axios.get(imageUrl, {
+                responseType: 'arraybuffer',
+                timeout: 30000
+            });
+            imageBuffer = Buffer.from(imageResponse.data);
+            finalMimeType = imageResponse.headers['content-type'] || 'image/jpeg';
+        } else {
+            return res.status(400).json({
+                success: false,
+                error: 'يجب إرسال إما image (Base64) أو imageUrl (رابط)'
+            });
+        }
 
         const result = await processImage(imageBuffer, finalMimeType, prompt);
         result.meta = {
@@ -170,7 +200,8 @@ router.post('/', async (req, res) => {
         console.error('AI Image Editor Error:', error.message);
         res.status(500).json({
             success: false,
-            error: error.message || 'حدث خطأ داخلي في الخادم'
+            error: error.message || 'حدث خطأ داخلي في الخادم',
+            code: error.code || 'UNKNOWN'
         });
     }
 });
