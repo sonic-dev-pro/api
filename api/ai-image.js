@@ -1,193 +1,112 @@
-/*
-   المطور الوحيد:
-   - محمد (SONIC DEV) 🇲🇦
-   حقوق التطوير محفوظة بالكامل
-*/
+/**
+ * 🎬 Nanobanana AI Image Editor API — سونيك بنانا تعديل صور بالذكاء الاصطناعي
+ * ⃟꙰⃢ 𝚂𝙾𝙽𝙸𝙲➥𝙱ᝪᝨ ❯ |‌⃟🇲🇦‌|‌
+ * حہּٰقَــــوٰقَ sonic dev(محمد) & zyro core (الياس) 💻🔥
+ */
 
 import express from 'express';
+import multer from 'multer';
 import axios from 'axios';
-import crypto from 'crypto';
+import FormData from 'form-data';
 
-const router = express.Router();
+const app = express();
 
-// ─── دالة التحقق من وجود نص عربي ──────────────────────────────────────
-function hasArabic(text) {
-    return /[\u0600-\u06FF]/.test(text);
-}
-
-// ─── دالة ترجمة إلى الإنجليزية ──────────────────────────────────────
-async function translateToEnglish(text) {
-    try {
-        const { data } = await axios.get(`https://translate.googleapis.com/translate_a/single`, {
-            params: {
-                client: 'gtx',
-                sl: 'auto',
-                tl: 'en',
-                dt: 't',
-                q: text
-            },
-            timeout: 8000
-        });
-        return data[0].map(item => item[0]).join('');
-    } catch (e) {
-        console.log('Translation error:', e.message);
-        return text;
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('⚠️ الملف المرفوع يجب أن يكون صورة فقط!'));
+        }
     }
-}
+});
 
-// ─── الدالة الأساسية لمعالجة الصورة ──────────────────────────────────
-async function processImage(imageBuffer, mimeType, prompt) {
-    // ترجمة النص إذا كان عربياً
-    let finalPrompt = prompt;
-    if (hasArabic(prompt)) {
-        finalPrompt = await translateToEnglish(prompt);
-    }
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-    // تحويل الصورة إلى base64
-    const base64Image = `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
-
-    // تحضير الـ payload
-    const payload = {
-        prompt: finalPrompt,
-        input_image: base64Image,
-        input_image_mime_type: mimeType || 'image/jpeg',
-        input_image_extension: (mimeType || 'image/jpeg').split('/')[1] || 'jpeg',
-        width: 576,
-        height: 1024,
-        mode: 'standard',
-        client_request_id: crypto.randomUUID(),
-    };
-
-    // إرسال الطلب إلى Raphael.app
-    const response = await axios.post('https://raphael.app/api/ai-image-editor', payload, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'text/plain; charset=utf-8',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
-        responseType: 'text',
-        timeout: 60000,
+// دالة لمعالجة الصورة ورفعها للسيرفر الأساسي للتعديل
+async function processImageEdit(imgBuffer, mimeType, promptText) {
+    const form = new FormData();
+    form.append('prompt', promptText);
+    form.append('file', imgBuffer, {
+        filename: `sonic_nanobanana_${Date.now()}.png`,
+        contentType: mimeType
     });
 
-    // استخراج النتيجة
-    const lines = response.data.trim().split('\n');
-    const lastLine = JSON.parse(lines[lines.length - 1]);
+    const apiUrl = 'https://api-nanzz.my.id/docs/api/ai-image/nanobanana-edit.php';
 
-    if (lastLine.status !== 'complete') {
-        throw new Error('فشل تعديل الصورة أو أنها لا تزال قيد المعالجة');
-    }
+    const response = await axios.post(apiUrl, form, {
+        headers: {
+            ...form.getHeaders(),
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        },
+        timeout: 60000 
+    });
 
-    const resultUrl = `https://raphael.app${lastLine.data.url}`;
-
-    return {
-        success: true,
-        data: {
-            resultUrl: resultUrl,
-            originalPrompt: prompt,
-            translatedPrompt: finalPrompt,
-            status: lastLine.status
-        }
-    };
+    return response.data;
 }
 
-// ─── GET Endpoint (صورة عبر رابط) ────────────────────────────────────
-router.get('/', async (req, res) => {
+// مسار تعديل الصور واستقبال الـ file
+app.post('/api/ai-image', upload.single('file'), async (req, res) => {
     try {
-        const { imageUrl, prompt } = req.query;
-
-        if (!imageUrl) {
-            return res.status(400).json({
-                success: false,
-                error: 'يجب توفير معامل imageUrl (رابط الصورة) و prompt (وصف التعديل)'
-            });
-        }
-
+        const prompt = req.body.prompt || req.query.prompt;
         if (!prompt) {
             return res.status(400).json({
-                success: false,
-                error: 'يجب توفير معامل prompt (وصف التعديل)'
+                status: false,
+                message: '⚠️ يرجى كتابة نص التعديل (prompt) المطلوب.'
             });
         }
 
-        // تحميل الصورة من الرابط
-        const imageResponse = await axios.get(imageUrl, {
-            responseType: 'arraybuffer',
-            timeout: 30000
+        const file = req.file;
+        if (!file) {
+            return res.status(400).json({
+                status: false,
+                message: '⚠️ يرجى إرفاق الصورة المراد تعديلها في حقل "file".'
+            });
+        }
+
+        const resultData = await processImageEdit(file.buffer, file.mimetype, prompt);
+
+        if (!resultData.status || !resultData.result || !resultData.result.url) {
+            return res.status(502).json({
+                status: false,
+                message: `❌ فشل التعديل من الخادم الأساسي: ${resultData.msg || 'خطأ غير معروف'}`
+            });
+        }
+
+        return res.status(200).json({
+            status: true,
+            developer: 'sonic dev(محمد) & zyro core (الياس)',
+            source_channel: 'https://whatsapp.com/channel/0029Vb7On131NCrU8Di4Ev1z',
+            result: {
+                prompt: prompt,
+                original_name: file.originalname,
+                mime_type: file.mimetype,
+                edited_image_url: resultData.result.url
+            }
         });
 
-        const mimeType = imageResponse.headers['content-type'] || 'image/jpeg';
-        const imageBuffer = Buffer.from(imageResponse.data);
-
-        const result = await processImage(imageBuffer, mimeType, prompt);
-        result.meta = {
-            timestamp: new Date().toISOString()
-        };
-
-        res.status(200).json(result);
-
     } catch (error) {
-        console.error('AI Image Editor Error:', error.message);
-        res.status(500).json({
-            success: false,
-            error: error.message || 'حدث خطأ داخلي في الخادم'
+        console.error('API Nanobanana Error:', error);
+        return res.status(500).json({
+            status: false,
+            message: '❌ حدث خطأ داخلي أثناء المعالجة.',
+            error: error.message || error
         });
     }
 });
 
-// ─── POST Endpoint (استقبال Base64 أو رابط) ─────────────────────────
-router.post('/', async (req, res) => {
-    try {
-        const { image, imageUrl, mimeType, prompt } = req.body;
-
-        if (!prompt) {
-            return res.status(400).json({
-                success: false,
-                error: 'يجب توفير حقل prompt (وصف التعديل)'
-            });
-        }
-
-        let imageBuffer;
-        let finalMimeType = mimeType || 'image/jpeg';
-
-        if (image) {
-            // استقبال Base64
-            imageBuffer = Buffer.from(image, 'base64');
-        } else if (imageUrl) {
-            // استقبال رابط
-            const imageResponse = await axios.get(imageUrl, {
-                responseType: 'arraybuffer',
-                timeout: 30000
-            });
-            imageBuffer = Buffer.from(imageResponse.data);
-            finalMimeType = imageResponse.headers['content-type'] || 'image/jpeg';
-        } else {
-            return res.status(400).json({
-                success: false,
-                error: 'يجب إرسال إما image (base64) أو imageUrl (رابط)'
-            });
-        }
-
-        const result = await processImage(imageBuffer, finalMimeType, prompt);
-        result.meta = {
-            timestamp: new Date().toISOString()
-        };
-
-        res.status(200).json(result);
-
-    } catch (error) {
-        console.error('AI Image Editor Error:', error.message);
-        res.status(500).json({
-            success: false,
-            error: error.message || 'حدث خطأ داخلي في الخادم'
-        });
-    }
-});
-
-export default {
+export const metadata = {
     path: '/api/ai-image',
-    name: 'AI Image Editor',
-    type: 'ai',
-    urlExample: 'GET /api/ai-image?imageUrl=https://example.com/photo.jpg&prompt=make%20it%20cartoon',
-    logo: 'https://i.imgur.com/ai-logo.png',
-    router: router
+    name: 'Nanobanana AI Image Editor',
+    type: 'POST',
+    url_example: '/api/ai-image?prompt=convert to pencil sketch',
+    logo: 'https://telegra.ph/file/sonic-bot-icon.png'
 };
+
+export default app;
