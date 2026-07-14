@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram API - Sonic</title>
+    <title>Sonic API Center - Instagram</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -19,19 +19,20 @@
             --bg-card: rgba(255,255,255,0.03);
             --bg-card-hover: rgba(255,255,255,0.07);
             --border-color: rgba(255,255,255,0.06);
-            --border-hover: rgba(118,75,162,0.4);
+            --border-hover: rgba(118,75,162,0.5);
             --text-primary: #ffffff;
             --text-secondary: #a0a0c0;
             --text-muted: #5a5a7a;
             --accent-1: #667eea;
             --accent-2: #764ba2;
             --accent-3: #f093fb;
+            --accent-4: #4facfe;
             --success: #00e676;
             --warning: #ffab40;
             --danger: #ff5252;
             --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             --radius-sm: 8px;
-            --radius-md: 12px;
+            --radius-md: 14px;
             --radius-lg: 20px;
             --radius-full: 9999px;
             --font-main: 'Tajawal', sans-serif;
@@ -99,14 +100,14 @@
         .main-container {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px;
         }
         .hero {
             padding: 30px 0 20px;
             text-align: center;
         }
         .hero-icon {
-            font-size: 64px;
+            font-size: 56px;
             margin-bottom: 6px;
         }
         .hero-title {
@@ -124,106 +125,128 @@
             max-width: 550px;
             margin: 6px auto 20px;
         }
-        .api-card {
+        /* Input Section */
+        .input-section {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            padding: 28px;
+            padding: 24px 28px;
             margin-bottom: 24px;
             transition: all 0.3s;
         }
-        .api-card:hover {
+        .input-section:hover {
             border-color: var(--border-hover);
             background: var(--bg-card-hover);
         }
-        .api-card .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .api-card .card-header .left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .api-card .card-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: var(--radius-md);
-            background: rgba(240,147,251,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-        }
-        .api-card .card-header h2 {
-            font-size: 22px;
-            font-weight: 800;
-        }
-        .api-card .card-status {
-            padding: 4px 14px;
-            border-radius: var(--radius-full);
-            font-size: 11px;
-            font-weight: 700;
-            background: rgba(0,230,118,0.1);
-            color: var(--success);
-        }
-        .api-card .api-desc {
+        .input-section .input-label {
             font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 18px;
-            line-height: 1.7;
-        }
-        .api-card .endpoint-box {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 12px 16px;
+            font-weight: 700;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-            gap: 10px;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+        .input-section .input-label i {
+            color: var(--accent-1);
+        }
+        .input-group {
+            display: flex;
+            gap: 12px;
             flex-wrap: wrap;
         }
-        .api-card .endpoint-box .method {
-            padding: 4px 14px;
-            border-radius: var(--radius-sm);
-            font-weight: 700;
-            font-size: 11px;
-            background: rgba(0,230,118,0.15);
-            color: var(--success);
-            flex-shrink: 0;
-        }
-        .api-card .endpoint-box .endpoint {
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: var(--accent-4);
-            direction: ltr;
-            text-align: left;
+        .input-group input {
             flex: 1;
-            overflow-x: auto;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            background: rgba(255,255,255,0.04);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: var(--font-main);
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+        .input-group input:focus {
+            border-color: var(--accent-1);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        .input-group input::placeholder {
+            color: var(--text-muted);
+        }
+        .input-group .btn {
+            padding: 14px 32px;
+            border-radius: var(--radius-md);
+            background: var(--gradient-main);
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: var(--font-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
             white-space: nowrap;
         }
-        .api-card .endpoint-box .copy-btn {
-            background: none;
-            border: none;
+        .input-group .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(118,75,162,0.3);
+        }
+        .input-group .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .input-group .btn .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .input-group .btn.loading .spinner { display: block; }
+        .input-group .btn.loading .btn-text { display: none; }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .examples {
+            margin-top: 12px;
+            font-size: 13px;
             color: var(--text-muted);
+        }
+        .examples a {
+            color: var(--accent-1);
             cursor: pointer;
-            padding: 4px 10px;
-            border-radius: var(--radius-sm);
+            text-decoration: underline;
             transition: all 0.3s;
-            font-size: 14px;
         }
-        .api-card .endpoint-box .copy-btn:hover {
-            color: var(--text-primary);
-            background: rgba(255,255,255,0.05);
+        .examples a:hover { color: var(--accent-3); }
+
+        /* Result Section */
+        .result-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
         }
-        .section-title {
-            font-size: 17px;
+        .result-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .result-card .card-title {
+            font-size: 16px;
             font-weight: 700;
             margin-bottom: 12px;
             display: flex;
@@ -231,8 +254,14 @@
             gap: 10px;
             color: var(--text-secondary);
         }
-        .section-title i {
+        .result-card .card-title i {
             color: var(--accent-1);
+        }
+        .result-card .card-title .badge-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-right: auto;
         }
         .code-block {
             background: rgba(0,0,0,0.4);
@@ -240,34 +269,9 @@
             border-radius: var(--radius-md);
             padding: 16px;
             position: relative;
-            margin-bottom: 14px;
             overflow-x: auto;
         }
-        .code-block .code-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .code-block .code-label i {
-            color: var(--accent-1);
-        }
-        .code-block code {
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            line-height: 1.8;
-            color: var(--text-secondary);
-            white-space: pre-wrap;
-            word-break: break-all;
-            direction: ltr;
-            text-align: left;
-            display: block;
-        }
-        .code-block .copy-code-btn {
+        .code-block .copy-btn {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -281,9 +285,20 @@
             font-family: var(--font-main);
             transition: all 0.3s;
         }
-        .code-block .copy-code-btn:hover {
+        .code-block .copy-btn:hover {
             background: rgba(255,255,255,0.1);
             color: var(--text-primary);
+        }
+        .code-block code {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-break: break-all;
+            direction: ltr;
+            text-align: left;
+            display: block;
         }
         .code-block .json-key { color: #f093fb; }
         .code-block .json-string { color: #00e676; }
@@ -294,34 +309,7 @@
         .code-block .keyword { color: #f093fb; }
         .code-block .string { color: #00e676; }
         .code-block .function { color: #4facfe; }
-        .badges {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 6px;
-        }
-        .badge {
-            padding: 3px 12px;
-            border-radius: var(--radius-full);
-            font-size: 10px;
-            font-weight: 700;
-        }
-        .badge.free { background: rgba(102,126,234,0.1); color: var(--accent-1); border: 1px solid rgba(102,126,234,0.2); }
-        .badge.popular { background: rgba(255,214,0,0.1); color: #ffd600; border: 1px solid rgba(255,214,0,0.2); }
-        .badge.premium { background: rgba(240,147,251,0.1); color: var(--accent-3); border: 1px solid rgba(240,147,251,0.2); }
-        .footer {
-            border-top: 1px solid var(--border-color);
-            padding: 25px 0;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 12px;
-            margin-top: 20px;
-        }
-        .footer a {
-            color: var(--accent-1);
-            text-decoration: none;
-        }
-        .footer a:hover { color: var(--accent-3); }
+
         .toast-container {
             position: fixed;
             top: 80px;
@@ -343,17 +331,40 @@
         .toast .toast-title { font-weight: 700; font-size: 13px; }
         .toast .toast-message { font-size: 12px; color: var(--text-secondary); }
         .toast.success { border-right: 3px solid var(--success); }
+        .toast.error { border-right: 3px solid var(--danger); }
+        .toast.info { border-right: 3px solid var(--accent-1); }
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(-30px); }
             to { opacity: 1; transform: translateX(0); }
         }
+        .footer {
+            border-top: 1px solid var(--border-color);
+            padding: 25px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .footer a {
+            color: var(--accent-1);
+            text-decoration: none;
+        }
+        .footer a:hover { color: var(--accent-3); }
+        .error-msg {
+            color: var(--danger);
+            padding: 10px 14px;
+            background: rgba(255,82,82,0.1);
+            border: 1px solid rgba(255,82,82,0.2);
+            border-radius: var(--radius-md);
+            margin-top: 10px;
+        }
         @media (max-width: 600px) {
             .main-container { padding: 0 14px; }
-            .api-card { padding: 18px; }
-            .api-card .card-header .left { gap: 10px; }
-            .api-card .card-icon { width: 42px; height: 42px; font-size: 20px; }
-            .api-card .card-header h2 { font-size: 18px; }
-            .code-block { font-size: 11px; padding: 12px; }
+            .input-section { padding: 18px; }
+            .input-group { flex-direction: column; }
+            .input-group .btn { width: 100%; justify-content: center; }
+            .result-card { padding: 16px; }
+            .code-block { padding: 12px; font-size: 11px; }
             .code-block code { font-size: 11px; }
         }
     </style>
@@ -364,7 +375,7 @@
     <nav class="navbar">
         <a href="#" class="nav-brand">
             <div class="brand-icon">⚡</div>
-            <span>Sonic API</span>
+            <span>Sonic API Center</span>
         </a>
         <div class="nav-status">
             <span class="dot"></span>
@@ -385,125 +396,72 @@
                 <span class="gradient-text">Instagram</span> Downloader API
             </h1>
             <p class="hero-subtitle">
-                تحميل فيديوهات، صور، ريلز، وقصص من انستقرام بأعلى جودة
+                أدخل رابط انستقرام واحصل على روابط التحميل المباشرة مع PREVIEW و CURL
             </p>
         </section>
 
-        <!-- API Card -->
-        <div class="api-card">
-            <div class="card-header">
-                <div class="left">
-                    <div class="card-icon">📸</div>
-                    <h2>Instagram Downloader</h2>
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-label">
+                <i class="fa-solid fa-link"></i>
+                رابط انستقرام
+            </div>
+            <div class="input-group">
+                <input type="text" id="urlInput" placeholder="https://www.instagram.com/reel/C7Xxyz123/">
+                <button class="btn" id="downloadBtn">
+                    <span class="spinner"></span>
+                    <span class="btn-text"><i class="fa-solid fa-download"></i> تحميل</span>
+                </button>
+            </div>
+            <div class="examples">
+                مثال: 
+                <a id="exampleLink">https://www.instagram.com/reel/C7Xxyz123/</a>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-section" id="resultSection">
+
+            <!-- Preview Response -->
+            <div class="result-card">
+                <div class="card-title">
+                    <i class="fa-regular fa-file-code"></i>
+                    PREVIEW Response
+                    <span class="badge-time" id="responseTime"></span>
                 </div>
-                <span class="card-status">🟢 نشط</span>
-            </div>
-
-            <p class="api-desc">
-                واجهة برمجية لتحميل المحتوى من انستقرام. تدعم:
-                <strong>الريلز، المنشورات، القصص، والألبومات</strong>.
-                تعيد روابط التحميل المباشرة بأعلى جودة متاحة.
-            </p>
-
-            <div class="badges">
-                <span class="badge free">🆓 مجاني</span>
-                <span class="badge popular">⭐ شائع</span>
-            </div>
-
-            <!-- Endpoint -->
-            <div style="margin: 18px 0 14px;">
-                <div class="section-title"><i class="fa-solid fa-link"></i> رابط الـ API</div>
-                <div class="endpoint-box">
-                    <span class="method">GET</span>
-                    <span class="endpoint" id="endpointText">/api/instagram?url={رابط_انستقرام}</span>
-                    <button class="copy-btn" onclick="copyEndpoint()"><i class="fa-regular fa-copy"></i></button>
-                </div>
-            </div>
-
-            <!-- CURL -->
-            <div>
-                <div class="section-title"><i class="fa-solid fa-terminal"></i> CURL</div>
                 <div class="code-block">
-                    <button class="copy-code-btn" onclick="copyCode('curlCode')">📋 نسخ</button>
+                    <button class="copy-btn" onclick="copyCode('previewCode')">📋 نسخ</button>
+                    <code id="previewCode">
+<span class="comment">// جاري التحميل...</span>
+                    </code>
+                </div>
+            </div>
+
+            <!-- CURL Command -->
+            <div class="result-card">
+                <div class="card-title">
+                    <i class="fa-solid fa-terminal"></i>
+                    CURL Command
+                </div>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('curlCode')">📋 نسخ</button>
                     <code id="curlCode">
-<span class="comment"># تحميل ريل من انستقرام</span>
-curl -X GET "<span class="string">https://api.sonic.dev/api/instagram?url=https://www.instagram.com/reel/C7Xxyz123/</span>"
+<span class="comment"># جاري التحميل...</span>
                     </code>
                 </div>
             </div>
 
             <!-- JavaScript Example -->
-            <div>
-                <div class="section-title"><i class="fa-brands fa-js"></i> JavaScript (Fetch)</div>
+            <div class="result-card">
+                <div class="card-title">
+                    <i class="fa-brands fa-js"></i>
+                    JavaScript (Fetch)
+                </div>
                 <div class="code-block">
-                    <button class="copy-code-btn" onclick="copyCode('jsCode')">📋 نسخ</button>
+                    <button class="copy-btn" onclick="copyCode('jsCode')">📋 نسخ</button>
                     <code id="jsCode">
-<span class="comment">// تحميل ريل من انستقرام</span>
-<span class="keyword">fetch</span>(<span class="string">'/api/instagram?url=https://www.instagram.com/reel/C7Xxyz123/'</span>)
-  .<span class="keyword">then</span>(res => res.<span class="function">json</span>())
-  .<span class="keyword">then</span>(data => {
-    <span class="function">console</span>.<span class="function">log</span>(<span class="string">'أفضل جودة:'</span>, data.data.bestQuality.url);
-    <span class="function">console</span>.<span class="function">log</span>(<span class="string">'جميع الفيديوهات:'</span>, data.data.videos);
-    <span class="function">console</span>.<span class="function">log</span>(<span class="string">'الصور:'</span>, data.data.images);
-  });
+<span class="comment">// جاري التحميل...</span>
                     </code>
-                </div>
-            </div>
-
-            <!-- Response Preview -->
-            <div>
-                <div class="section-title"><i class="fa-regular fa-file-code"></i> نموذج الرد (Preview)</div>
-                <div class="code-block">
-                    <button class="copy-code-btn" onclick="copyCode('responseCode')">📋 نسخ</button>
-                    <code id="responseCode">
-{
-  <span class="json-key">"success"</span>: <span class="json-boolean">true</span>,
-  <span class="json-key">"data"</span>: {
-    <span class="json-key">"type"</span>: <span class="json-string">"single"</span>,
-    <span class="json-key">"count"</span>: <span class="json-number">1</span>,
-    <span class="json-key">"videos"</span>: [
-      {
-        <span class="json-key">"url"</span>: <span class="json-string">"https://cdn.instagram.com/video.mp4"</span>,
-        <span class="json-key">"quality"</span>: <span class="json-string">"HD"</span>
-      }
-    ],
-    <span class="json-key">"images"</span>: [],
-    <span class="json-key">"bestQuality"</span>: {
-      <span class="json-key">"url"</span>: <span class="json-string">"https://cdn.instagram.com/video_hd.mp4"</span>,
-      <span class="json-key">"quality"</span>: <span class="json-string">"HD"</span>
-    }
-  },
-  <span class="json-key">"meta"</span>: {
-    <span class="json-key">"requestId"</span>: <span class="json-number">1</span>,
-    <span class="json-key">"timestamp"</span>: <span class="json-string">"2026-07-14T14:30:33.544Z"</span>
-  }
-}
-                    </code>
-                </div>
-            </div>
-
-            <!-- Parameters -->
-            <div style="margin-top: 6px;">
-                <div class="section-title"><i class="fa-solid fa-sliders"></i> المعاملات (Parameters)</div>
-                <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 16px;">
-                    <table style="width:100%; border-collapse: collapse; font-size: 13px; direction: ltr; text-align: left;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid var(--border-color);">
-                                <th style="padding: 6px 8px; color: var(--accent-1);">الاسم</th>
-                                <th style="padding: 6px 8px; color: var(--accent-1);">النوع</th>
-                                <th style="padding: 6px 8px; color: var(--accent-1);">مطلوب</th>
-                                <th style="padding: 6px 8px; color: var(--accent-1);">الوصف</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="border-bottom: 1px solid var(--border-color);">
-                                <td style="padding: 8px; font-family: monospace; color: var(--accent-4);">url</td>
-                                <td style="padding: 8px; color: var(--text-secondary);">string</td>
-                                <td style="padding: 8px; color: var(--success);">✅ نعم</td>
-                                <td style="padding: 8px; color: var(--text-secondary);">رابط المنشور أو الريل أو القصة</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
 
@@ -518,11 +476,158 @@ curl -X GET "<span class="string">https://api.sonic.dev/api/instagram?url=https:
 
     <script>
         // ═══════════════════════════════════════════════════════════════
+        // 🔧 DOM Elements
+        // ═══════════════════════════════════════════════════════════════
+        const urlInput = document.getElementById('urlInput');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resultSection = document.getElementById('resultSection');
+        const previewCode = document.getElementById('previewCode');
+        const curlCode = document.getElementById('curlCode');
+        const jsCode = document.getElementById('jsCode');
+        const responseTime = document.getElementById('responseTime');
+        const exampleLink = document.getElementById('exampleLink');
+
+        // ═══════════════════════════════════════════════════════════════
+        // 📝 مثال للاختبار
+        // ═══════════════════════════════════════════════════════════════
+        const exampleUrl = 'https://www.instagram.com/reel/C7Xxyz123/';
+        exampleLink.textContent = exampleUrl;
+        exampleLink.addEventListener('click', () => {
+            urlInput.value = exampleUrl;
+            downloadMedia();
+        });
+
+        // ═══════════════════════════════════════════════════════════════
+        // ⌨️ Events
+        // ═══════════════════════════════════════════════════════════════
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') downloadMedia();
+        });
+        downloadBtn.addEventListener('click', downloadMedia);
+
+        // ═══════════════════════════════════════════════════════════════
+        // 📥 دالة التحميل الرئيسية
+        // ═══════════════════════════════════════════════════════════════
+        async function downloadMedia() {
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                showToast('error', '❌ خطأ', 'يرجى إدخال رابط انستقرام');
+                return;
+            }
+
+            if (!url.includes('instagram.com')) {
+                showToast('error', '❌ خطأ', 'الرابط يجب أن يكون من Instagram');
+                return;
+            }
+
+            // إظهار حالة التحميل
+            downloadBtn.classList.add('loading');
+            downloadBtn.disabled = true;
+            resultSection.classList.remove('active');
+            previewCode.textContent = '⏳ جاري التحميل...';
+            curlCode.textContent = '⏳ جاري التحميل...';
+            jsCode.textContent = '⏳ جاري التحميل...';
+
+            try {
+                const apiUrl = `/api/instagram?url=${encodeURIComponent(url)}`;
+                const startTime = performance.now();
+
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                    let errMsg = 'حدث خطأ في الخادم';
+                    try {
+                        const errData = await response.json();
+                        errMsg = errData.error || errMsg;
+                    } catch (e) {}
+                    throw new Error(errMsg);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'فشل تحميل الميديا');
+                }
+
+                const endTime = performance.now();
+                const responseTimeMs = ((endTime - startTime) / 1000).toFixed(2);
+                responseTime.textContent = `⏱️ ${responseTimeMs}s`;
+
+                // عرض النتائج
+                displayResults(data, url);
+
+                // إظهار القسم
+                resultSection.classList.add('active');
+
+                showToast('success', '✅ تم بنجاح', 'تم استخراج روابط التحميل');
+
+            } catch (error) {
+                previewCode.textContent = `❌ خطأ: ${error.message}`;
+                curlCode.textContent = `❌ خطأ: ${error.message}`;
+                jsCode.textContent = `❌ خطأ: ${error.message}`;
+                resultSection.classList.add('active');
+                showToast('error', '❌ فشل', error.message);
+            } finally {
+                downloadBtn.classList.remove('loading');
+                downloadBtn.disabled = false;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // 📊 عرض النتائج
+        // ═══════════════════════════════════════════════════════════════
+        function displayResults(data, url) {
+            // 1. PREVIEW Response
+            const jsonStr = JSON.stringify(data, null, 2);
+            previewCode.innerHTML = syntaxHighlight(jsonStr);
+
+            // 2. CURL Command
+            const baseUrl = window.location.origin;
+            const encodedUrl = encodeURIComponent(url);
+            const curlCmd = `curl -X GET "${baseUrl}/api/instagram?url=${encodedUrl}"`;
+            curlCode.innerHTML = `<span class="comment"># تحميل من انستقرام</span>\n${curlCmd}`;
+
+            // 3. JavaScript Example
+            const jsExample = `// تحميل من انستقرام
+fetch('${baseUrl}/api/instagram?url=${encodedUrl}')
+  .then(res => res.json())
+  .then(data => {
+    console.log('أفضل جودة:', data.data.bestQuality.url);
+    console.log('جميع الفيديوهات:', data.data.videos);
+    console.log('الصور:', data.data.images);
+  });`;
+            jsCode.innerHTML = syntaxHighlight(jsExample);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // 🎨 Syntax Highlight للـ JSON
+        // ═══════════════════════════════════════════════════════════════
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return `<span class="${cls}">${match}</span>`;
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════
         // 📋 دالة النسخ
         // ═══════════════════════════════════════════════════════════════
         function copyText(text, successMsg = 'تم النسخ') {
             navigator.clipboard.writeText(text).then(() => {
-                showToast('success', '✅ ' + successMsg);
+                showToast('success', '✅ تم النسخ', successMsg);
             }).catch(() => {
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
@@ -530,7 +635,7 @@ curl -X GET "<span class="string">https://api.sonic.dev/api/instagram?url=https:
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
-                showToast('success', '✅ ' + successMsg);
+                showToast('success', '✅ تم النسخ', successMsg);
             });
         }
 
@@ -540,27 +645,22 @@ curl -X GET "<span class="string">https://api.sonic.dev/api/instagram?url=https:
             copyText(text);
         }
 
-        function copyEndpoint() {
-            const text = document.getElementById('endpointText').textContent;
-            copyText(text, 'تم نسخ رابط الـ API');
-        }
-
         // ═══════════════════════════════════════════════════════════════
         // 🍞 Toast System
         // ═══════════════════════════════════════════════════════════════
-        function showToast(type, message) {
+        function showToast(type, title, message) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
-                <div class="toast-title">${message}</div>
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
             `;
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            setTimeout(() => toast.remove(), 3500);
         }
 
         console.log('📸 Instagram Downloader API ready!');
-        console.log('📍 Endpoint: /api/instagram?url={url}');
     </script>
 </body>
 </html>
