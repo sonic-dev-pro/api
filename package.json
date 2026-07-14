@@ -2,7 +2,7 @@
   "name": "sonic-api-center",
   "version": "1.0.0",
   "type": "module",
-  "description": "Sonic API Center",
+  "description": "Sonic API Center - مجموعة من الـ APIs للمطورين",
   "scripts": {
     "start": "node api/index.js"
   },
