@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        /* ===== نفس الـ Styles السابق ===== */
         * {
             margin: 0;
             padding: 0;
@@ -125,7 +126,6 @@
             max-width: 550px;
             margin: 6px auto 20px;
         }
-        /* API Selector */
         .api-selector {
             display: flex;
             gap: 12px;
@@ -169,8 +169,6 @@
             background: rgba(255,171,64,0.1);
             color: var(--warning);
         }
-
-        /* Input Section */
         .input-section {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -273,8 +271,6 @@
             transition: all 0.3s;
         }
         .examples a:hover { color: var(--accent-3); }
-
-        /* Result Section */
         .result-section {
             display: none;
             animation: fadeIn 0.4s ease-out;
@@ -357,7 +353,6 @@
         .code-block .keyword { color: #f093fb; }
         .code-block .string { color: #00e676; }
         .code-block .function { color: #4facfe; }
-
         .toast-container {
             position: fixed;
             top: 80px;
@@ -398,14 +393,6 @@
             text-decoration: none;
         }
         .footer a:hover { color: var(--accent-3); }
-        .error-msg {
-            color: var(--danger);
-            padding: 10px 14px;
-            background: rgba(255,82,82,0.1);
-            border: 1px solid rgba(255,82,82,0.2);
-            border-radius: var(--radius-md);
-            margin-top: 10px;
-        }
         @media (max-width: 600px) {
             .main-container { padding: 0 14px; }
             .input-section { padding: 18px; }
@@ -459,7 +446,7 @@
             <button class="api-tab" data-api="youtube">
                 <i class="fa-brands fa-youtube"></i>
                 YouTube
-                <span class="tab-status soon">قريباً</span>
+                <span class="tab-status">نشط</span>
             </button>
             <button class="api-tab" data-api="tiktok">
                 <i class="fa-brands fa-tiktok"></i>
@@ -550,7 +537,7 @@
 
     <script>
         // ═══════════════════════════════════════════════════════════════
-        // 📦 قاعدة بيانات الـ APIs
+        // 📦 قاعدة بيانات الـ APIs (Instagram + YouTube + قريباً)
         // ═══════════════════════════════════════════════════════════════
         const apis = {
             instagram: {
@@ -560,16 +547,18 @@
                 endpoint: '/api/instagram',
                 placeholder: 'https://www.instagram.com/reel/C7Xxyz123/',
                 example: 'https://www.instagram.com/reel/C7Xxyz123/',
-                status: 'active'
+                status: 'active',
+                method: 'GET'
             },
             youtube: {
                 id: 'youtube',
                 name: 'YouTube',
                 icon: 'fa-brands fa-youtube',
                 endpoint: '/api/youtube',
-                placeholder: 'https://www.youtube.com/watch?v=xxx',
+                placeholder: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 example: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-                status: 'soon'
+                status: 'active',
+                method: 'GET'
             },
             tiktok: {
                 id: 'tiktok',
@@ -578,7 +567,8 @@
                 endpoint: '/api/tiktok',
                 placeholder: 'https://www.tiktok.com/@user/video/xxx',
                 example: 'https://www.tiktok.com/@user/video/123456789',
-                status: 'soon'
+                status: 'soon',
+                method: 'GET'
             },
             ai: {
                 id: 'ai',
@@ -587,7 +577,8 @@
                 endpoint: '/api/ai/chat',
                 placeholder: 'اكتب سؤالك هنا...',
                 example: 'ما هو الذكاء الاصطناعي؟',
-                status: 'soon'
+                status: 'soon',
+                method: 'POST'
             }
         };
 
@@ -644,6 +635,10 @@
         // ═══════════════════════════════════════════════════════════════
         exampleLink.addEventListener('click', () => {
             const api = apis[currentApi];
+            if (api.status === 'soon') {
+                showToast('warning', '⏳ قريباً', `${api.name} API قيد التطوير`);
+                return;
+            }
             urlInput.value = api.example;
             downloadMedia();
         });
@@ -661,15 +656,16 @@
         // ═══════════════════════════════════════════════════════════════
         async function downloadMedia() {
             const api = apis[currentApi];
-            const input = urlInput.value.trim();
-
-            if (!input) {
-                showToast('error', '❌ خطأ', `يرجى إدخال ${api.name} المناسب`);
-                return;
-            }
+            if (!api) return;
 
             if (api.status === 'soon') {
                 showToast('warning', '⏳ قريباً', `${api.name} API قيد التطوير`);
+                return;
+            }
+
+            const input = urlInput.value.trim();
+            if (!input) {
+                showToast('error', '❌ خطأ', `يرجى إدخال ${api.name} المناسب`);
                 return;
             }
 
@@ -739,7 +735,7 @@
             previewCode.innerHTML = syntaxHighlight(jsonStr);
 
             // 2. CURL Command
-            const curlCmd = `curl -X GET "${baseUrl}${api.endpoint}?url=${encodedInput}"`;
+            const curlCmd = `curl -X ${api.method || 'GET'} "${baseUrl}${api.endpoint}?url=${encodedInput}"`;
             curlCode.innerHTML = `<span class="comment"># ${api.name} API</span>\n${curlCmd}`;
 
             // 3. JavaScript Example
