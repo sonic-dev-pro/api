@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic API Center - Instagram</title>
+    <title>Sonic API Center</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -125,6 +125,51 @@
             max-width: 550px;
             margin: 6px auto 20px;
         }
+        /* API Selector */
+        .api-selector {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .api-selector .api-tab {
+            padding: 10px 24px;
+            border-radius: var(--radius-full);
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: var(--font-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .api-selector .api-tab:hover {
+            border-color: rgba(255,255,255,0.15);
+            color: var(--text-primary);
+        }
+        .api-selector .api-tab.active {
+            border-color: var(--accent-2);
+            background: rgba(118,75,162,0.15);
+            color: var(--text-primary);
+            box-shadow: 0 0 20px rgba(118,75,162,0.15);
+        }
+        .api-selector .api-tab .tab-status {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            background: rgba(0,230,118,0.1);
+            color: var(--success);
+        }
+        .api-selector .api-tab .tab-status.soon {
+            background: rgba(255,171,64,0.1);
+            color: var(--warning);
+        }
+
         /* Input Section */
         .input-section {
             background: var(--bg-card);
@@ -149,6 +194,9 @@
         }
         .input-section .input-label i {
             color: var(--accent-1);
+        }
+        .input-section .input-label .api-name {
+            color: var(--text-primary);
         }
         .input-group {
             display: flex;
@@ -366,6 +414,7 @@
             .result-card { padding: 16px; }
             .code-block { padding: 12px; font-size: 11px; }
             .code-block code { font-size: 11px; }
+            .api-selector .api-tab { padding: 8px 16px; font-size: 13px; }
         }
     </style>
 </head>
@@ -391,29 +440,54 @@
 
         <!-- Hero -->
         <section class="hero">
-            <div class="hero-icon">📸</div>
+            <div class="hero-icon">🚀</div>
             <h1 class="hero-title">
-                <span class="gradient-text">Instagram</span> Downloader API
+                <span class="gradient-text">Sonic</span> API Center
             </h1>
             <p class="hero-subtitle">
-                أدخل رابط انستقرام واحصل على روابط التحميل المباشرة مع PREVIEW و CURL
+                منصة متكاملة تضم أقوى الـ APIs للمطورين. اختر الخدمة، أدخل الرابط، واحصل على النتيجة
             </p>
         </section>
+
+        <!-- API Selector -->
+        <div class="api-selector" id="apiSelector">
+            <button class="api-tab active" data-api="instagram">
+                <i class="fa-brands fa-instagram"></i>
+                Instagram
+                <span class="tab-status">نشط</span>
+            </button>
+            <button class="api-tab" data-api="youtube">
+                <i class="fa-brands fa-youtube"></i>
+                YouTube
+                <span class="tab-status soon">قريباً</span>
+            </button>
+            <button class="api-tab" data-api="tiktok">
+                <i class="fa-brands fa-tiktok"></i>
+                TikTok
+                <span class="tab-status soon">قريباً</span>
+            </button>
+            <button class="api-tab" data-api="ai">
+                <i class="fa-solid fa-brain"></i>
+                AI Chat
+                <span class="tab-status soon">قريباً</span>
+            </button>
+        </div>
 
         <!-- Input Section -->
         <div class="input-section">
             <div class="input-label">
                 <i class="fa-solid fa-link"></i>
-                رابط انستقرام
+                <span>رابط</span>
+                <span class="api-name" id="apiNameLabel">Instagram</span>
             </div>
             <div class="input-group">
                 <input type="text" id="urlInput" placeholder="https://www.instagram.com/reel/C7Xxyz123/">
                 <button class="btn" id="downloadBtn">
                     <span class="spinner"></span>
-                    <span class="btn-text"><i class="fa-solid fa-download"></i> تحميل</span>
+                    <span class="btn-text"><i class="fa-solid fa-play"></i> تنفيذ</span>
                 </button>
             </div>
-            <div class="examples">
+            <div class="examples" id="exampleContainer">
                 مثال: 
                 <a id="exampleLink">https://www.instagram.com/reel/C7Xxyz123/</a>
             </div>
@@ -432,7 +506,7 @@
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode('previewCode')">📋 نسخ</button>
                     <code id="previewCode">
-<span class="comment">// جاري التحميل...</span>
+<span class="comment">// انتظر تنفيذ الطلب...</span>
                     </code>
                 </div>
             </div>
@@ -446,7 +520,7 @@
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode('curlCode')">📋 نسخ</button>
                     <code id="curlCode">
-<span class="comment"># جاري التحميل...</span>
+<span class="comment"># انتظر تنفيذ الطلب...</span>
                     </code>
                 </div>
             </div>
@@ -460,7 +534,7 @@
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode('jsCode')">📋 نسخ</button>
                     <code id="jsCode">
-<span class="comment">// جاري التحميل...</span>
+<span class="comment">// انتظر تنفيذ الطلب...</span>
                     </code>
                 </div>
             </div>
@@ -470,11 +544,58 @@
         <!-- Footer -->
         <div class="footer">
             <p>⚡ SONIC DEV ❯ | 🇲🇦 — جميع الحقوق محفوظة © 2026</p>
-            <p style="font-size: 11px; margin-top: 4px;">Instagram Downloader API v1.0</p>
+            <p style="font-size: 11px; margin-top: 4px;">API Services for Developers</p>
         </div>
     </div>
 
     <script>
+        // ═══════════════════════════════════════════════════════════════
+        // 📦 قاعدة بيانات الـ APIs
+        // ═══════════════════════════════════════════════════════════════
+        const apis = {
+            instagram: {
+                id: 'instagram',
+                name: 'Instagram',
+                icon: 'fa-brands fa-instagram',
+                endpoint: '/api/instagram',
+                placeholder: 'https://www.instagram.com/reel/C7Xxyz123/',
+                example: 'https://www.instagram.com/reel/C7Xxyz123/',
+                status: 'active'
+            },
+            youtube: {
+                id: 'youtube',
+                name: 'YouTube',
+                icon: 'fa-brands fa-youtube',
+                endpoint: '/api/youtube',
+                placeholder: 'https://www.youtube.com/watch?v=xxx',
+                example: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                status: 'soon'
+            },
+            tiktok: {
+                id: 'tiktok',
+                name: 'TikTok',
+                icon: 'fa-brands fa-tiktok',
+                endpoint: '/api/tiktok',
+                placeholder: 'https://www.tiktok.com/@user/video/xxx',
+                example: 'https://www.tiktok.com/@user/video/123456789',
+                status: 'soon'
+            },
+            ai: {
+                id: 'ai',
+                name: 'AI Chat',
+                icon: 'fa-solid fa-brain',
+                endpoint: '/api/ai/chat',
+                placeholder: 'اكتب سؤالك هنا...',
+                example: 'ما هو الذكاء الاصطناعي؟',
+                status: 'soon'
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // 🔧 المتغيرات
+        // ═══════════════════════════════════════════════════════════════
+        let currentApi = 'instagram';
+
         // ═══════════════════════════════════════════════════════════════
         // 🔧 DOM Elements
         // ═══════════════════════════════════════════════════════════════
@@ -486,14 +607,44 @@
         const jsCode = document.getElementById('jsCode');
         const responseTime = document.getElementById('responseTime');
         const exampleLink = document.getElementById('exampleLink');
+        const exampleContainer = document.getElementById('exampleContainer');
+        const apiNameLabel = document.getElementById('apiNameLabel');
+
+        // ═══════════════════════════════════════════════════════════════
+        // 🏷️ تبديل الـ API
+        // ═══════════════════════════════════════════════════════════════
+        document.querySelectorAll('.api-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.api-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentApi = tab.dataset.api;
+                updateApiUI();
+            });
+        });
+
+        function updateApiUI() {
+            const api = apis[currentApi];
+            if (!api) return;
+
+            apiNameLabel.textContent = api.name;
+            urlInput.placeholder = api.placeholder;
+            exampleLink.textContent = api.example;
+            exampleLink.dataset.example = api.example;
+
+            // إخفاء النتائج السابقة
+            resultSection.classList.remove('active');
+            previewCode.innerHTML = `<span class="comment">// انتظر تنفيذ الطلب...</span>`;
+            curlCode.innerHTML = `<span class="comment"># انتظر تنفيذ الطلب...</span>`;
+            jsCode.innerHTML = `<span class="comment">// انتظر تنفيذ الطلب...</span>`;
+            urlInput.value = '';
+        }
 
         // ═══════════════════════════════════════════════════════════════
         // 📝 مثال للاختبار
         // ═══════════════════════════════════════════════════════════════
-        const exampleUrl = 'https://www.instagram.com/reel/C7Xxyz123/';
-        exampleLink.textContent = exampleUrl;
         exampleLink.addEventListener('click', () => {
-            urlInput.value = exampleUrl;
+            const api = apis[currentApi];
+            urlInput.value = api.example;
             downloadMedia();
         });
 
@@ -509,15 +660,16 @@
         // 📥 دالة التحميل الرئيسية
         // ═══════════════════════════════════════════════════════════════
         async function downloadMedia() {
-            const url = urlInput.value.trim();
+            const api = apis[currentApi];
+            const input = urlInput.value.trim();
 
-            if (!url) {
-                showToast('error', '❌ خطأ', 'يرجى إدخال رابط انستقرام');
+            if (!input) {
+                showToast('error', '❌ خطأ', `يرجى إدخال ${api.name} المناسب`);
                 return;
             }
 
-            if (!url.includes('instagram.com')) {
-                showToast('error', '❌ خطأ', 'الرابط يجب أن يكون من Instagram');
+            if (api.status === 'soon') {
+                showToast('warning', '⏳ قريباً', `${api.name} API قيد التطوير`);
                 return;
             }
 
@@ -530,7 +682,8 @@
             jsCode.textContent = '⏳ جاري التحميل...';
 
             try {
-                const apiUrl = `/api/instagram?url=${encodeURIComponent(url)}`;
+                const encodedInput = encodeURIComponent(input);
+                const apiUrl = `${api.endpoint}?url=${encodedInput}`;
                 const startTime = performance.now();
 
                 const response = await fetch(apiUrl);
@@ -547,7 +700,7 @@
                 const data = await response.json();
 
                 if (!data.success) {
-                    throw new Error(data.error || 'فشل تحميل الميديا');
+                    throw new Error(data.error || 'فشل تنفيذ الطلب');
                 }
 
                 const endTime = performance.now();
@@ -555,12 +708,12 @@
                 responseTime.textContent = `⏱️ ${responseTimeMs}s`;
 
                 // عرض النتائج
-                displayResults(data, url);
+                displayResults(data, input, api);
 
                 // إظهار القسم
                 resultSection.classList.add('active');
 
-                showToast('success', '✅ تم بنجاح', 'تم استخراج روابط التحميل');
+                showToast('success', '✅ تم بنجاح', 'تم تنفيذ الطلب');
 
             } catch (error) {
                 previewCode.textContent = `❌ خطأ: ${error.message}`;
@@ -577,35 +730,32 @@
         // ═══════════════════════════════════════════════════════════════
         // 📊 عرض النتائج
         // ═══════════════════════════════════════════════════════════════
-        function displayResults(data, url) {
+        function displayResults(data, input, api) {
+            const baseUrl = window.location.origin;
+            const encodedInput = encodeURIComponent(input);
+
             // 1. PREVIEW Response
             const jsonStr = JSON.stringify(data, null, 2);
             previewCode.innerHTML = syntaxHighlight(jsonStr);
 
             // 2. CURL Command
-            const baseUrl = window.location.origin;
-            const encodedUrl = encodeURIComponent(url);
-            const curlCmd = `curl -X GET "${baseUrl}/api/instagram?url=${encodedUrl}"`;
-            curlCode.innerHTML = `<span class="comment"># تحميل من انستقرام</span>\n${curlCmd}`;
+            const curlCmd = `curl -X GET "${baseUrl}${api.endpoint}?url=${encodedInput}"`;
+            curlCode.innerHTML = `<span class="comment"># ${api.name} API</span>\n${curlCmd}`;
 
             // 3. JavaScript Example
-            const jsExample = `// تحميل من انستقرام
-fetch('${baseUrl}/api/instagram?url=${encodedUrl}')
+            const jsExample = `// ${api.name} API
+fetch('${baseUrl}${api.endpoint}?url=${encodedInput}')
   .then(res => res.json())
-  .then(data => {
-    console.log('أفضل جودة:', data.data.bestQuality.url);
-    console.log('جميع الفيديوهات:', data.data.videos);
-    console.log('الصور:', data.data.images);
-  });`;
+  .then(data => console.log(data));`;
             jsCode.innerHTML = syntaxHighlight(jsExample);
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // 🎨 Syntax Highlight للـ JSON
+        // 🎨 Syntax Highlight
         // ═══════════════════════════════════════════════════════════════
-        function syntaxHighlight(json) {
-            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+        function syntaxHighlight(text) {
+            text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return text.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
                 let cls = 'json-number';
                 if (/^"/.test(match)) {
                     if (/:$/.test(match)) {
@@ -660,7 +810,13 @@ fetch('${baseUrl}/api/instagram?url=${encodedUrl}')
             setTimeout(() => toast.remove(), 3500);
         }
 
-        console.log('📸 Instagram Downloader API ready!');
+        // ═══════════════════════════════════════════════════════════════
+        // 🚀 بدء التشغيل
+        // ═══════════════════════════════════════════════════════════════
+        updateApiUI();
+        console.log('🚀 Sonic API Center ready!');
+        console.log('📚 APIs متاحة:', Object.keys(apis).length);
+        console.log('💡 لإضافة APIs جديدة، أضفها في مصفوفة apis');
     </script>
 </body>
 </html>
