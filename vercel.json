@@ -14,6 +14,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "api/proxy.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "index.html",
       "use": "@vercel/static"
     }
@@ -34,6 +38,10 @@
     {
       "src": "/api/ai-image(.*)",
       "dest": "/api/ai-image.js"
+    },
+    {
+      "src": "/api/proxy(.*)",
+      "dest": "/api/proxy.js"
     }
   ]
 }
