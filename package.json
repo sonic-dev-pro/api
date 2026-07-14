@@ -2,7 +2,7 @@
   "name": "instagram-downloader-api",
   "version": "1.0.0",
   "type": "module",
-  "description": "API لتحميل فيديوهات Instagram (Reels, Posts, Stories) مع دعم الألبومات",
+  "description": "API لتحميل فيديوهات Instagram",
   "main": "api/instagram.js",
   "scripts": {
     "start": "node api/instagram.js"
