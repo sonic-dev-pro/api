@@ -8,24 +8,6 @@
 import express from 'express';
 import axios from 'axios';
 import crypto from 'crypto';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-
-// ─── إعدادات Multer لرفع الصور ──────────────────────────────────────
-const storage = multer.memoryStorage();
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        if (allowedTypes.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error('نوع الملف غير مدعوم. استخدم jpg, png, webp'));
-        }
-    }
-});
 
 // ─── دالة التحقق من وجود نص عربي ──────────────────────────────────────
 function hasArabic(text) {
@@ -48,7 +30,7 @@ async function translateToEnglish(text) {
         return data[0].map(item => item[0]).join('');
     } catch (e) {
         console.log('Translation error:', e.message);
-        return text; // في حالة فشل الترجمة نعيد النص الأصلي
+        return text;
     }
 }
 
@@ -83,7 +65,7 @@ async function processImage(imageBuffer, mimeType, prompt) {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         },
         responseType: 'text',
-        timeout: 60000, // 60 ثانية
+        timeout: 60000,
     });
 
     // 5. استخراج النتيجة
@@ -91,7 +73,7 @@ async function processImage(imageBuffer, mimeType, prompt) {
     const lastLine = JSON.parse(lines[lines.length - 1]);
 
     if (lastLine.status !== 'complete') {
-        throw new Error('فشل تعديل الصورة أو أنها لا تزال قيد المعالجة، حاول مرة أخرى.');
+        throw new Error('فشل تعديل الصورة أو أنها لا تزال قيد المعالجة');
     }
 
     const resultUrl = `https://raphael.app${lastLine.data.url}`;
@@ -140,7 +122,6 @@ router.get('/', async (req, res) => {
 
         const result = await processImage(imageBuffer, mimeType, prompt);
         result.meta = {
-            requestId: req.requestId || 0,
             timestamp: new Date().toISOString()
         };
 
@@ -155,19 +136,15 @@ router.get('/', async (req, res) => {
     }
 });
 
-// ─── POST Endpoint (رفع ملف صورة) ────────────────────────────────────
-router.post('/', upload.single('image'), async (req, res) => {
+// ─── POST Endpoint (استقبال Base64 مباشرة) ──────────────────────────
+router.post('/', async (req, res) => {
     try {
-        // req.file يحتوي على الصورة المرفوعة
-        // req.body.prompt يحتوي على النص
+        const { image, mimeType, prompt } = req.body;
 
-        const { prompt } = req.body;
-        const file = req.file;
-
-        if (!file) {
+        if (!image) {
             return res.status(400).json({
                 success: false,
-                error: 'يجب رفع ملف صورة مع الحقل image (jpeg, png, webp)'
+                error: 'يجب إرسال حقل image (base64) أو imageUrl (رابط)'
             });
         }
 
@@ -178,12 +155,12 @@ router.post('/', upload.single('image'), async (req, res) => {
             });
         }
 
-        const imageBuffer = file.buffer;
-        const mimeType = file.mimetype;
+        // تحويل base64 إلى Buffer
+        const imageBuffer = Buffer.from(image, 'base64');
+        const finalMimeType = mimeType || 'image/jpeg';
 
-        const result = await processImage(imageBuffer, mimeType, prompt);
+        const result = await processImage(imageBuffer, finalMimeType, prompt);
         result.meta = {
-            requestId: req.requestId || 0,
             timestamp: new Date().toISOString()
         };
 
