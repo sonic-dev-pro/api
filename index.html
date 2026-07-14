@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Downloader API - Sonic DEV</title>
+    <title>مركز الخدمات - Sonic API</title>
     <style>
         * {
             margin: 0;
@@ -13,296 +13,436 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             min-height: 100vh;
-            display: flex;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 0 30px;
+            color: white;
+        }
+
+        .logo {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #aaa;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        /* Search */
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #333;
+            border-radius: 12px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .search-box input::placeholder {
+            color: #666;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 20px rgba(118, 75, 162, 0.2);
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: #764ba2;
+            box-shadow: 0 20px 60px rgba(118, 75, 162, 0.3);
+        }
+
+        .service-card .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .service-card h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .service-card p {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .service-card .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            background: #764ba2;
+            color: white;
+            margin-right: 5px;
+        }
+
+        .service-card .badge.soon {
+            background: #ff6b6b;
+        }
+
+        .service-card .badge.new {
+            background: #51cf66;
+        }
+
+        .service-card .badge.popular {
+            background: #ffd93d;
+            color: #333;
+        }
+
+        .service-card .status {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .service-card .status.active {
+            background: #51cf66;
+            box-shadow: 0 0 20px #51cf66;
+        }
+
+        .service-card .status.maintenance {
+            background: #ffd93d;
+            box-shadow: 0 0 20px #ffd93d;
+        }
+
+        .service-card .status.inactive {
+            background: #ff6b6b;
+            box-shadow: 0 0 20px #ff6b6b;
+        }
+
+        .service-card .arrow {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 20px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .service-card:hover .arrow {
+            opacity: 1;
+            transform: translateX(-5px);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-box .number {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-box .label {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
 
-        .container {
-            background: rgba(255, 255, 255, 0.95);
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
             border-radius: 20px;
             padding: 40px;
-            max-width: 800px;
+            max-width: 700px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .logo {
+        .modal-close:hover {
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .modal-header {
+            margin-bottom: 25px;
+        }
+
+        .modal-header .icon {
             font-size: 50px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
-        h1 {
-            color: #333;
+        .modal-header h2 {
             font-size: 28px;
             margin-bottom: 5px;
         }
 
-        .subtitle {
-            color: #666;
-            font-size: 14px;
+        .modal-header p {
+            color: #aaa;
         }
 
-        .subtitle a {
-            color: #764ba2;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .input-group {
+        .modal-body .input-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
+            margin: 15px 0;
             flex-wrap: wrap;
         }
 
-        input[type="text"] {
+        .modal-body input {
             flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #e0e0e0;
+            padding: 12px 18px;
+            border: 2px solid #333;
             border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 14px;
             min-width: 200px;
         }
 
-        input[type="text"]:focus {
+        .modal-body input:focus {
             outline: none;
             border-color: #764ba2;
-            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.2);
         }
 
-        .btn {
-            padding: 15px 30px;
+        .modal-body .btn {
+            padding: 12px 25px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            white-space: nowrap;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(118, 75, 162, 0.3);
+        .modal-body .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(118, 75, 162, 0.3);
         }
 
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn:disabled {
+        .modal-body .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .example {
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .example a {
-            color: #764ba2;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-
-        #loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: #764ba2;
-            font-weight: bold;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #764ba2;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        #result {
-            display: none;
-            margin-top: 30px;
-            border-top: 2px solid #f0f0f0;
-            padding-top: 20px;
-        }
-
-        .result-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-
-        .result-title {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .video-item {
-            background: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .video-item a {
-            color: #764ba2;
-            text-decoration: none;
-            font-weight: bold;
-            word-break: break-all;
-        }
-
-        .video-item a:hover {
-            text-decoration: underline;
-        }
-
-        .quality-badge {
-            background: #764ba2;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .best-quality {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        #resultArea {
+            margin-top: 20px;
             padding: 15px;
             border-radius: 10px;
-            margin-bottom: 15px;
-            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
-        .best-quality a {
-            color: white;
-            font-weight: bold;
+        #resultArea .loading {
+            text-align: center;
+            color: #aaa;
+        }
+
+        .result-item {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .result-item a {
+            color: #667eea;
             text-decoration: none;
         }
 
-        .best-quality a:hover {
+        .result-item a:hover {
             text-decoration: underline;
         }
 
-        .error {
-            background: #fee;
-            color: #c00;
-            padding: 15px;
-            border-radius: 10px;
-            border-right: 4px solid #c00;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #764ba2;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #888;
+        .error-message {
+            color: #ff6b6b;
+            padding: 10px;
         }
 
         .footer {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #f0f0f0;
-            font-size: 12px;
-            color: #999;
+            padding: 30px 0 10px;
+            color: #555;
+            font-size: 13px;
         }
 
         .footer a {
-            color: #764ba2;
+            color: #667eea;
             text-decoration: none;
         }
 
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #764ba2;
+            border-radius: 10px;
+        }
+
+        /* Responsive */
         @media (max-width: 600px) {
-            .container {
+            .header h1 {
+                font-size: 26px;
+            }
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-content {
                 padding: 20px;
             }
-            .input-group {
+            .modal-body .input-group {
                 flex-direction: column;
             }
-            .btn {
+            .modal-body .btn {
                 width: 100%;
-            }
-            h1 {
-                font-size: 22px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <div class="header">
-            <div class="logo">📸</div>
-            <h1>Instagram Downloader</h1>
-            <div class="subtitle">
-                API بواسطة <a href="#" target="_blank">𝑺𝑶𝑵𝑰𝑪 𝑫𝑬𝑽</a>
+            <div class="logo">🚀</div>
+            <h1>مركز الخدمات - Sonic API</h1>
+            <p>جميع أدواتك في مكان واحد | بواسطة 𝑺𝑶𝑵𝑰𝑪 𝑫𝑬𝑽</p>
+        </div>
+
+        <!-- Search -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 ابحث عن خدمة...">
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-box">
+                <div class="number" id="totalServices">0</div>
+                <div class="label">الخدمات المتاحة</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="totalRequests">0</div>
+                <div class="label">عدد الطلبات</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">⚡</div>
+                <div class="label">جميع الخدمات تعمل</div>
             </div>
         </div>
 
-        <div class="input-group">
-            <input type="text" id="urlInput" placeholder="أدخل رابط Instagram (Reel, Post, Story)">
-            <button class="btn" id="downloadBtn">تحميل 📥</button>
+        <!-- Services Grid -->
+        <div class="services-grid" id="servicesGrid">
+            <!-- ستتم إضافة الخدمات بواسطة JavaScript -->
         </div>
-
-        <div class="example">
-            مثال: <a id="exampleLink">https://www.instagram.com/reel/C7Xxyz123/</a>
-        </div>
-
-        <div id="loading">
-            <div class="spinner"></div>
-            جاري تحميل الميديا...
-        </div>
-
-        <div id="result"></div>
 
         <div class="footer">
             <p>⚡ 𝚂𝙾𝙽𝙸𝙲➥Ᏼᝪᝨ ❯ | 🇲🇦</p>
@@ -310,52 +450,210 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">✕</button>
+            <div class="modal-header">
+                <div class="icon" id="modalIcon">📸</div>
+                <h2 id="modalTitle">Instagram Downloader</h2>
+                <p id="modalDesc">قم بإدخال رابط Instagram للحصول على روابط التحميل</p>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" id="modalInput" placeholder="أدخل الرابط هنا...">
+                    <button class="btn" id="modalBtn">تحميل 📥</button>
+                </div>
+                <div id="resultArea"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const urlInput = document.getElementById('urlInput');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const loading = document.getElementById('loading');
-        const resultDiv = document.getElementById('result');
-        const exampleLink = document.getElementById('exampleLink');
+        // ─── قائمة الخدمات ──────────────────────────────────────────────
+        const services = [
+            {
+                id: 'instagram',
+                name: 'Instagram Downloader',
+                icon: '📸',
+                description: 'تحميل فيديوهات وصور من Instagram (Reels, Posts, Stories)',
+                endpoint: '/api/instagram',
+                inputPlaceholder: 'أدخل رابط Instagram...',
+                badge: 'popular',
+                status: 'active',
+                type: 'downloader'
+            },
+            {
+                id: 'youtube',
+                name: 'YouTube Downloader',
+                icon: '▶️',
+                description: 'تحميل فيديوهات وقوائم تشغيل من YouTube بجودة عالية',
+                endpoint: '/api/youtube',
+                inputPlaceholder: 'أدخل رابط YouTube...',
+                badge: 'new',
+                status: 'soon',
+                type: 'downloader',
+                comingSoon: true
+            },
+            {
+                id: 'tiktok',
+                name: 'TikTok Downloader',
+                icon: '🎵',
+                description: 'تحميل فيديوهات TikTok بدون علامة مائية',
+                endpoint: '/api/tiktok',
+                inputPlaceholder: 'أدخل رابط TikTok...',
+                badge: 'new',
+                status: 'soon',
+                type: 'downloader',
+                comingSoon: true
+            },
+            {
+                id: 'ai',
+                name: 'AI Assistant',
+                icon: '🤖',
+                description: 'ذكاء اصطناعي للإجابة على الأسئلة والمساعدة في المهام',
+                endpoint: '/api/ai',
+                inputPlaceholder: 'اسأل أي شيء...',
+                badge: 'new',
+                status: 'soon',
+                type: 'ai',
+                comingSoon: true
+            },
+            {
+                id: 'text-to-speech',
+                name: 'Text to Speech',
+                icon: '🗣️',
+                description: 'تحويل النص إلى صوت طبيعي باللغة العربية والإنجليزية',
+                endpoint: '/api/tts',
+                inputPlaceholder: 'أدخل النص الذي تريد تحويله إلى صوت...',
+                badge: 'new',
+                status: 'soon',
+                type: 'media',
+                comingSoon: true
+            },
+            {
+                id: 'image-generator',
+                name: 'AI Image Generator',
+                icon: '🎨',
+                description: 'توليد صور مذهلة باستخدام الذكاء الاصطناعي',
+                endpoint: '/api/image',
+                inputPlaceholder: 'اكتب وصف الصورة التي تريد إنشاءها...',
+                badge: 'new',
+                status: 'soon',
+                type: 'ai',
+                comingSoon: true
+            }
+        ];
 
-        // مثال للاختبار
-        const exampleUrl = 'https://www.instagram.com/reel/C7Xxyz123/';
-        exampleLink.textContent = exampleUrl;
-        exampleLink.onclick = () => {
-            urlInput.value = exampleUrl;
-            downloadMedia();
-        };
+        // ─── عرض الخدمات ──────────────────────────────────────────────
+        let totalRequests = 0;
 
-        // حدث الضغط على Enter
-        urlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                downloadMedia();
+        function renderServices(filter = '') {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = '';
+            let count = 0;
+
+            services.forEach(service => {
+                const nameMatch = service.name.toLowerCase().includes(filter.toLowerCase());
+                const descMatch = service.description.toLowerCase().includes(filter.toLowerCase());
+                const typeMatch = service.type.toLowerCase().includes(filter.toLowerCase());
+
+                if (filter && !nameMatch && !descMatch && !typeMatch) return;
+
+                count++;
+                const card = document.createElement('div');
+                card.className = 'service-card';
+                card.dataset.id = service.id;
+
+                let statusClass = service.status;
+                let statusText = '';
+                if (service.comingSoon) {
+                    statusText = '🔜 قريباً';
+                }
+
+                card.innerHTML = `
+                    <div class="status ${statusClass}"></div>
+                    <span class="icon">${service.icon}</span>
+                    <h3>${service.name}</h3>
+                    <p>${service.description}</p>
+                    <div>
+                        <span class="badge ${service.badge || ''}">${service.badge || 'API'}</span>
+                        ${service.comingSoon ? '<span class="badge soon">قريباً</span>' : ''}
+                    </div>
+                    <div class="arrow">→</div>
+                `;
+
+                if (!service.comingSoon) {
+                    card.addEventListener('click', () => openModal(service));
+                } else {
+                    card.style.opacity = '0.6';
+                    card.style.cursor = 'default';
+                }
+
+                grid.appendChild(card);
+            });
+
+            document.getElementById('totalServices').textContent = count;
+        }
+
+        // ─── البحث ──────────────────────────────────────────────────────
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderServices(e.target.value);
+        });
+
+        // ─── فتح النافذة المنبثقة ──────────────────────────────────────
+        function openModal(service) {
+            const modal = document.getElementById('modal');
+            document.getElementById('modalIcon').textContent = service.icon;
+            document.getElementById('modalTitle').textContent = service.name;
+            document.getElementById('modalDesc').textContent = service.description;
+            document.getElementById('modalInput').placeholder = service.inputPlaceholder;
+            document.getElementById('modalBtn').textContent = 'تحميل 📥';
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('resultArea').innerHTML = '';
+            document.getElementById('modalInput').value = '';
+            document.getElementById('modalBtn').disabled = false;
+
+            // تخزين بيانات الخدمة
+            modal.dataset.service = JSON.stringify(service);
+
+            modal.classList.add('active');
+        }
+
+        // ─── إغلاق النافذة ──────────────────────────────────────────────
+        document.getElementById('modalClose').addEventListener('click', () => {
+            document.getElementById('modal').classList.remove('active');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
             }
         });
 
-        downloadBtn.addEventListener('click', downloadMedia);
+        // ─── معالجة الطلب ──────────────────────────────────────────────
+        document.getElementById('modalBtn').addEventListener('click', async () => {
+            const modal = document.getElementById('modal');
+            const service = JSON.parse(modal.dataset.service);
+            const input = document.getElementById('modalInput');
+            const resultArea = document.getElementById('resultArea');
+            const btn = document.getElementById('modalBtn');
 
-        async function downloadMedia() {
-            const url = urlInput.value.trim();
+            const url = input.value.trim();
             if (!url) {
-                showError('❌ يرجى إدخال رابط Instagram');
+                resultArea.style.display = 'block';
+                resultArea.innerHTML = '<div class="error-message">❌ يرجى إدخال الرابط أو النص المطلوب</div>';
                 return;
             }
 
-            // التحقق من أن الرابط من Instagram
-            if (!url.includes('instagram.com')) {
-                showError('❌ الرابط يجب أن يكون من Instagram');
-                return;
-            }
-
-            // إظهار التحميل
-            loading.style.display = 'block';
-            resultDiv.style.display = 'none';
-            downloadBtn.disabled = true;
-            resultDiv.innerHTML = '';
+            // إظهار حالة التحميل
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = '<div class="loading">⏳ جاري المعالجة...</div>';
+            btn.disabled = true;
 
             try {
                 // استدعاء الـ API
-                const apiUrl = `/api/instagram?url=${encodeURIComponent(url)}`;
+                const apiUrl = `${service.endpoint}?url=${encodeURIComponent(url)}`;
                 const response = await fetch(apiUrl);
 
                 if (!response.ok) {
@@ -366,113 +664,84 @@
                 const data = await response.json();
 
                 if (!data.success) {
-                    throw new Error(data.error || 'فشل تحميل الميديا');
+                    throw new Error(data.error || 'فشل تنفيذ الطلب');
                 }
 
-                // عرض النتائج
-                displayResult(data);
+                // عرض النتيجة (سيختلف حسب نوع الخدمة)
+                displayResult(resultArea, service, data);
+
+                // زيادة عدد الطلبات
+                totalRequests++;
+                document.getElementById('totalRequests').textContent = totalRequests;
 
             } catch (error) {
-                showError(`❌ ${error.message}`);
+                resultArea.innerHTML = `<div class="error-message">❌ ${error.message}</div>`;
             } finally {
-                loading.style.display = 'none';
-                downloadBtn.disabled = false;
+                btn.disabled = false;
             }
-        }
+        });
 
-        function displayResult(data) {
-            resultDiv.style.display = 'block';
+        // ─── عرض النتائج حسب نوع الخدمة ──────────────────────────────
+        function displayResult(container, service, data) {
             let html = '';
 
-            // معلومات عامة
-            html += `
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-value">${data.data.count}</div>
-                        <div class="stat-label">عدد الملفات</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">${data.data.type === 'single' ? '🎬 فيديو' : '📦 ألبوم'}</div>
-                        <div class="stat-label">النوع</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">${data.data.videos.length}</div>
-                        <div class="stat-label">فيديوهات</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">${data.data.images.length}</div>
-                        <div class="stat-label">صور</div>
-                    </div>
-                </div>
-            `;
-
-            // أفضل جودة
-            if (data.data.bestQuality) {
-                html += `
-                    <div class="best-quality">
-                        <div>🎯 أفضل جودة متاحة</div>
-                        <a href="${data.data.bestQuality.url}" target="_blank">
-                            ⬇️ تحميل ${data.data.bestQuality.quality || 'HD'}
-                        </a>
-                    </div>
-                `;
-            }
-
-            // قائمة الفيديوهات
-            if (data.data.videos.length > 0) {
-                html += `
-                    <div class="result-card">
-                        <div class="result-title">🎬 الفيديوهات (${data.data.videos.length})</div>
-                `;
-                data.data.videos.forEach((video, index) => {
+            if (service.id === 'instagram') {
+                // Instagram Downloader
+                if (data.data.bestQuality) {
                     html += `
-                        <div class="video-item">
-                            <span>فيديو ${index + 1}</span>
-                            <span class="quality-badge">${video.quality || 'جودة عادية'}</span>
+                        <div class="result-item" style="background: rgba(118,75,162,0.2); border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                            <strong>🎯 أفضل جودة</strong><br>
+                            <a href="${data.data.bestQuality.url}" target="_blank">⬇️ تحميل ${data.data.bestQuality.quality || 'HD'}</a>
+                        </div>
+                    `;
+                }
+
+                data.data.videos.forEach((video, i) => {
+                    html += `
+                        <div class="result-item">
+                            🎬 فيديو ${i + 1} 
+                            <span style="color: #888; font-size: 12px;">${video.quality || 'جودة عادية'}</span>
+                            <br>
                             <a href="${video.url}" target="_blank">⬇️ تحميل</a>
                         </div>
                     `;
                 });
-                html += `</div>`;
-            }
 
-            // قائمة الصور
-            if (data.data.images.length > 0) {
-                html += `
-                    <div class="result-card">
-                        <div class="result-title">🖼️ الصور (${data.data.images.length})</div>
-                `;
-                data.data.images.forEach((image, index) => {
+                data.data.images.forEach((image, i) => {
                     html += `
-                        <div class="video-item">
-                            <span>صورة ${index + 1}</span>
+                        <div class="result-item">
+                            🖼️ صورة ${i + 1}
+                            <br>
                             <a href="${image.url}" target="_blank">⬇️ تحميل</a>
                         </div>
                     `;
                 });
-                html += `</div>`;
+
+            } else {
+                // خدمات أخرى (ستضاف لاحقاً)
+                html = `
+                    <div class="result-item">
+                        <pre style="color: #aaa; font-size: 12px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
             }
 
-            // معلومات إضافية
-            html += `
-                <div class="result-card" style="font-size: 12px; color: #888;">
-                    <div>🆔 معرف الطلب: ${data.meta?.requestId || 'N/A'}</div>
-                    <div>⏱️ الوقت: ${new Date(data.meta?.timestamp).toLocaleString('ar-EG')}</div>
-                </div>
-            `;
-
-            resultDiv.innerHTML = html;
+            container.innerHTML = html;
         }
 
-        function showError(message) {
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = `
-                <div class="error">${message}</div>
-            `;
-        }
+        // ─── الضغط على Enter في حقل الإدخال ───────────────────────────
+        document.getElementById('modalInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('modalBtn').click();
+            }
+        });
 
-        // تحميل تلقائي عند دخول الصفحة (اختياري)
-        // urlInput.value = exampleUrl;
+        // ─── تشغيل الخدمات عند تحميل الصفحة ───────────────────────────
+        renderServices();
+        document.getElementById('totalRequests').textContent = totalRequests;
+
+        console.log('🚀 Sonic API Center is ready!');
+        console.log('📚 عدد الخدمات:', services.length);
     </script>
 </body>
 </html>
