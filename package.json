@@ -2,7 +2,7 @@
   "name": "sonic-api-center",
   "version": "2.0.0",
   "type": "module",
-  "description": "Sonic API Center - مجموعة من الـ APIs للمطورين (Instagram, YouTube, AI Image)",
+  "description": "Sonic API Center - مجموعة من الـ APIs للمطورين (Instagram, YouTube, AI Image, Write)",
   "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js",
