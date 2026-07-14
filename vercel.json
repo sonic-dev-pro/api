@@ -36,27 +36,27 @@
       "dest": "/index.html"
     },
     {
-      "src": "/api/instagram(.*)",
+      "src": "/api/instagram",
       "dest": "/api/instagram.js"
     },
     {
-      "src": "/api/youtube(.*)",
+      "src": "/api/youtube",
       "dest": "/api/youtube.js"
     },
     {
-      "src": "/api/ai-image(.*)",
+      "src": "/api/ai-image",
       "dest": "/api/ai-image.js"
     },
     {
-      "src": "/api/write(.*)",
+      "src": "/api/write",
       "dest": "/api/write.js"
     },
     {
-      "src": "/api/img2prompt(.*)",
+      "src": "/api/img2prompt",
       "dest": "/api/img2prompt.js"
     },
     {
-      "src": "/api/proxy(.*)",
+      "src": "/api/proxy",
       "dest": "/api/proxy.js"
     }
   ]
