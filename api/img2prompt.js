@@ -121,14 +121,13 @@ router.all('/api/img2prompt', async (req, res) => {
         const fileName = `image_${Date.now()}.jpg`;
         const apiResult = await imageToPromptWithRetry(imageBuffer, fileName);
 
-        // 4. إرجاع النتيجة
+        // 4. إرجاع النتيجة بحقوقك بالكامل وبشكل نظيف
         return res.status(200).json({
             status: true,
-            creator: "SONIC DEV 🇲🇦",
+            creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭", // حقوقك الرسمية هنا
             result: {
                 description: apiResult.result || 'لم يتم العثور على وصف للصورة.',
-                task_id: apiResult.task_id || null,
-                original_creator: apiResult.creator || 'AI'
+                task_id: apiResult.task_id || null
             }
         });
 
@@ -163,7 +162,7 @@ router.all('/api/img2prompt', async (req, res) => {
 // ─── هيكلية التصدير المنظمة والمتوافقة مع Vercel و ES Modules ───────────
 export const apiMetadata = {
     path: '/api/img2prompt',
-    name: 'Image to Prompt AI',
+    name: '𝑺𝑶𝑵𝑰𝑪 𝑫𝑬𝑽⃢҉ ســونـيــڪ (Image to Prompt)',
     type: 'AI / Image Analysis',
     urlExample: '/api/img2prompt?url=https://raw.githubusercontent.com/node-form-data/form-data/master/test/data/example.gif',
     logo: 'https://whatsapp.com/channel/0029VbCferaKLaHtHkyEVe1z'
