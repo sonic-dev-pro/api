@@ -14,7 +14,7 @@
       "use": "@vercel/node"
     },
     {
-      "src": "api/write.js",
+      "src": "api/img2prompt.js",
       "use": "@vercel/node"
     },
     {
@@ -44,8 +44,8 @@
       "dest": "/api/ai-image.js"
     },
     {
-      "src": "/api/write(.*)",
-      "dest": "/api/write.js"
+      "src": "/api/img2prompt(.*)",
+      "dest": "/api/img2prompt.js"
     },
     {
       "src": "/api/proxy(.*)",
