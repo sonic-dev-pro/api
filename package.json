@@ -1,15 +1,25 @@
 {
   "name": "sonic-api-center",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
-  "description": "Sonic API Center - مجموعة من الـ APIs للمطورين",
+  "description": "Sonic API Center - مجموعة من الـ APIs للمطورين (Instagram, YouTube, AI Image)",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node api/index.js"
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.js"
   },
   "dependencies": {
     "axios": "^1.6.0",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "form-data": "^4.0.0",
+    "multer": "^1.4.5-lts.1"
   },
-  "author": "SONIC DEV",
-  "license": "MIT"
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "author": "SONIC DEV 🇲🇦",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
