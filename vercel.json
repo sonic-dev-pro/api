@@ -4,9 +4,17 @@
     {
       "src": "api/instagram.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/",
+      "dest": "/index.html"
+    },
     {
       "src": "/api/instagram(.*)",
       "dest": "/api/instagram.js"
