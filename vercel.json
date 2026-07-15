@@ -30,6 +30,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "api/ig-stalk.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "api/proxy.js",
       "use": "@vercel/node"
     },
@@ -66,6 +70,10 @@
     {
       "src": "/api/stalkchannel",
       "dest": "/api/stalkchannel.js"
+    },
+    {
+      "src": "/api/ig-stalk",
+      "dest": "/api/ig-stalk.js"
     },
     {
       "src": "/api/proxy",
