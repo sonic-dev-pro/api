@@ -3,7 +3,7 @@
  * 👤 المطور الثانوي: Zyro core (الياس) 🦇
  * 🎯 المشروع: SonicBot-MD v1.8.3
  * 🤖 اسم البوت: ⃟꙰⃢ 𝚂𝙾𝙽𝙸𝙲➥Ᏼᝪᝨ ❯ |‌⃟🇲🇦‌|‌
- * 📝 الوظيفة: جلب خلفية عشوائية وعرضها كصورة مباشرة في المتصفح
+ * 📝 الوظيفة: جلب خلفية عشوائية مباشرة من الـ Buffer وعرضها كصورة في المتصفح
  */
 
 import express from 'express';
@@ -15,50 +15,41 @@ const API_URL = 'https://api-nanzz.my.id/docs/api/random/random-wallpaper.php';
 // ─── الـ Endpoint الأساسي ────────────────────────────────────────────────
 router.all('/api/wallpaper', async (req, res) => {
     try {
-        // 1. طلب بيانات الخلفية العشوائية من الـ API الأساسي
-        const response = await axios.get(API_URL, {
-            timeout: 15000 // مهلة 15 ثانية
-        });
-
-        const data = response.data;
-
-        // 2. التحقق من صحة الاستجابة ووجود رابط الصورة
-        if (!data.status || !data.result || !data.result.url) {
-            return res.status(502).json({
-                status: false,
-                creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-                error: 'فشل جلب رابط الصورة العشوائية من المصدر.'
-            });
-        }
-
-        const imageUrl = data.result.url;
-
-        // 3. تحميل ملف الصورة كـ ArrayBuffer (بيانات ثنائية) لإعادة توجيهها للمتصفح
-        const imageStream = await axios.get(imageUrl, {
+        // 1. طلب جلب ملف الصورة مباشرة كـ arraybuffer
+        const imageResponse = await axios.get(API_URL, {
             responseType: 'arraybuffer',
-            timeout: 20000
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            },
+            timeout: 25000 // مهلة 25 ثانية
         });
 
-        // 4. تحديد نوع الملف (Mime-Type) المناسب للصورة
-        const contentType = imageStream.headers['content-type'] || 'image/jpeg';
+        // 2. تحديد نوع الـ Content-Type من ترويسات الملف المسترجع (غالباً image/jpeg أو image/png)
+        const contentType = imageResponse.headers['content-type'] || 'image/jpeg';
 
-        // 5. إعداد ترويسات الاستجابة لعرض الصورة مباشرة في صفحة المتصفح
+        // 3. إعداد ترويسات الاستجابة لعرض الصورة في متصفح المستخدم مباشرة وبشكل متجدد
         res.setHeader('Content-Type', contentType);
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // لضمان عدم حفظ الصورة مؤقتاً وظهور خلفية جديدة دائماً عند التحديث
-        res.setHeader('X-Developer', 'ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭'); // بصمتك البرمجية الخاصة في ترويسات الاستجابة
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // لضمان عدم حفظ المتصفح للصورة وعرض واحدة جديدة عند كل تحديث
+        res.setHeader('X-Developer', 'ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭'); // بصمتك البرمجية الخاصة
 
-        // 6. إرسال الصورة مباشرة للمتصفح ليتم عرضها تلقائياً
-        return res.send(Buffer.from(imageStream.data, 'binary'));
+        // 4. إرسال الـ Buffer للمتصفح مباشرة
+        return res.send(Buffer.from(imageResponse.data));
 
     } catch (error) {
-        console.error('Wallpaper API Error:', error);
+        console.error('Wallpaper Direct Buffer Error:', error);
 
-        return res.status(500).json({
-            status: false,
-            creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-            error: 'حدث خطأ أثناء معالجة وعرض الخلفية العشوائية.',
-            details: error.message
-        });
+        // في حال حدوث خطأ طارئ، نقوم بتحويل المستخدم كـ Redirect أخير للرابط الأساسي لضمان الخدمة
+        try {
+            res.setHeader('X-Developer', 'ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭');
+            return res.redirect(302, API_URL);
+        } catch (redirectErr) {
+            return res.status(500).json({
+                status: false,
+                creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
+                error: 'حدث خطأ أثناء تحميل وبث صورة الخلفية العشوائية.',
+                details: error.message
+            });
+        }
     }
 });
 
@@ -71,5 +62,5 @@ export const apiMetadata = {
     logo: 'https://whatsapp.com/channel/0029VbCferaKLaHtHkyEVe1z'
 };
 
-// التصدير الافتراضي لتوجيه Vercel
+// التصدير الافتراضي المطلوب لـ Vercel Routing
 export default router;
