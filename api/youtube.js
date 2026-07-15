@@ -1,8 +1,9 @@
-/*
-   المطور الوحيد:
-   - محمد (SONIC DEV) 🇲🇦
-   حقوق التطوير محفوظة بالكامل
-*/
+/*▲ حـقـوق الـتـطـويـر والـتـعـديـل ▲
+ * 👤 المطور الوحيد: محمد (SONIC DEV) 🇲🇦
+ * 🎯 المشروع: SonicBot-MD
+ * 📝 الوظيفة: YouTube Downloader API (استخراج روابط تحميل اليوتيوب بجودة عالية)
+ * حقوق التطوير محفوظة بالكامل
+ */
 
 import express from 'express';
 import axios from 'axios';
@@ -12,10 +13,10 @@ const router = express.Router();
 // دالة تأخير بسيطة
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// ─── Endpoint GET ─────────────────────────────────────────────────────
-router.get('/', async (req, res) => {
+// ─── الدالة الأساسية لمعالجة وتحميل الفيديو ──────────────────────────────
+async function handleDownload(url, res) {
     try {
-        const url = req.query.url;
+        // التحقق من وجود وصحة الرابط
         if (!url) {
             return res.status(400).json({
                 success: false,
@@ -23,7 +24,6 @@ router.get('/', async (req, res) => {
             });
         }
 
-        // التحقق من صحة الرابط
         if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
             return res.status(400).json({
                 success: false,
@@ -31,11 +31,10 @@ router.get('/', async (req, res) => {
             });
         }
 
-        // استخدام API بديل (أكثر استقراراً)
-        // جرب API مختلف أولاً
+        // استخدام API بديل أولاً (أكثر استقراراً)
         try {
             const response = await axios.get(`https://api.tubemp3.cc/convert?url=${encodeURIComponent(url)}`, {
-                timeout: 30000,
+                timeout: 15000,
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                 }
@@ -44,6 +43,7 @@ router.get('/', async (req, res) => {
             if (response.data && response.data.url) {
                 return res.json({
                     success: true,
+                    creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
                     data: {
                         title: response.data.title || 'YouTube Video',
                         downloadUrl: response.data.url,
@@ -75,7 +75,7 @@ router.get('/', async (req, res) => {
                 'content-type': 'application/json',
                 'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36'
             },
-            timeout: 30000
+            timeout: 25000
         });
 
         const resData = response.data;
@@ -88,7 +88,7 @@ router.get('/', async (req, res) => {
         let downloadUrl = null;
         let videoTitle = resData.title || 'YouTube Video';
         let attempts = 0;
-        const maxAttempts = 10;
+        const maxAttempts = 8; // تقليل عدد المحاولات لتفادي انتهاء وقت الـ Serverless في Vercel (10s/60s)
 
         while (attempts < maxAttempts) {
             await sleep(2000);
@@ -97,7 +97,7 @@ router.get('/', async (req, res) => {
             try {
                 const statusCheck = await axios.get(statusUrl, {
                     headers: { 'user-agent': 'Mozilla/5.0' },
-                    timeout: 15000
+                    timeout: 10000
                 });
                 const statusData = statusCheck.data;
 
@@ -110,7 +110,7 @@ router.get('/', async (req, res) => {
                 }
             } catch (pollError) {
                 if (attempts >= maxAttempts) {
-                    throw new Error('انتهى وقت الانتظار للتحويل');
+                    throw new Error('انتهى وقت الانتظار للتحويل بالتتبع المباشر');
                 }
             }
         }
@@ -119,8 +119,9 @@ router.get('/', async (req, res) => {
             throw new Error('استغرق السيرفر وقتاً طويلاً، حاول لاحقاً');
         }
 
-        res.json({
+        return res.json({
             success: true,
+            creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
             data: {
                 title: videoTitle,
                 downloadUrl: downloadUrl,
@@ -134,40 +135,33 @@ router.get('/', async (req, res) => {
 
     } catch (error) {
         console.error('YouTube Error:', error.message);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
+            creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
             error: error.message || 'حدث خطأ داخلي في الخادم'
         });
     }
+}
+
+// ─── Endpoint GET ─────────────────────────────────────────────────────
+router.get('/api/youtube', async (req, res) => {
+    const url = req.query.url;
+    await handleDownload(url, res);
 });
 
 // ─── Endpoint POST ────────────────────────────────────────────────────
-router.post('/', async (req, res) => {
-    try {
-        const { url } = req.body;
-        if (!url) {
-            return res.status(400).json({
-                success: false,
-                error: 'يجب إرسال كائن JSON يحتوي على حقل url'
-            });
-        }
-
-        // إعادة استخدام نفس المنطق
-        req.query.url = url;
-        return router.handle(req, res);
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
+router.post('/api/youtube', async (req, res) => {
+    const { url } = req.body || {};
+    await handleDownload(url, res);
 });
 
-export default {
+// ─── هيكلية التصدير المنظمة والمتوافقة مع Vercel و ES Modules ───────────
+export const apiMetadata = {
     path: '/api/youtube',
     name: 'YouTube Downloader API',
     type: 'downloader',
-    urlExample: 'GET /api/youtube?url=https://youtube.com/watch?v=...',
-    logo: 'https://i.imgur.com/youtube-logo.png',
-    router: router
+    urlExample: '/api/youtube?url=https://youtube.com/watch?v=...',
+    logo: 'https://i.imgur.com/youtube-logo.png'
 };
+
+export default router;
