@@ -26,6 +26,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "api/stalkchannel.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "api/proxy.js",
       "use": "@vercel/node"
     },
@@ -62,6 +66,10 @@
     {
       "src": "/api/wallpaper",
       "dest": "/api/wallpaper.js"
+    },
+    {
+      "src": "/api/stalkchannel",
+      "dest": "/api/stalkchannel.js"
     },
     {
       "src": "/api/proxy",
