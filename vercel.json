@@ -34,6 +34,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "api/record-web.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "api/proxy.js",
       "use": "@vercel/node"
     },
@@ -74,6 +78,10 @@
     {
       "src": "/api/ig-stalk",
       "dest": "/api/ig-stalk.js"
+    },
+    {
+      "src": "/api/record-web",
+      "dest": "/api/record-web.js"
     },
     {
       "src": "/api/proxy",
