@@ -201,7 +201,7 @@
             gap: 12px;
             flex-wrap: wrap;
         }
-        .input-group input {
+        .input-group input, .input-group textarea {
             flex: 1;
             padding: 14px 18px;
             border-radius: var(--radius-md);
@@ -213,12 +213,12 @@
             transition: all 0.3s;
             min-width: 200px;
         }
-        .input-group input:focus {
+        .input-group input:focus, .input-group textarea:focus {
             border-color: var(--accent-1);
             outline: none;
             box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
         }
-        .input-group input::placeholder {
+        .input-group input::placeholder, .input-group textarea::placeholder {
             color: var(--text-muted);
         }
         .input-group .btn {
@@ -393,6 +393,42 @@
             text-decoration: none;
         }
         .footer a:hover { color: var(--accent-3); }
+        /* إضافات لرفع الملفات */
+        .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .file-upload-label {
+            display: inline-block;
+            padding: 10px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            font-weight: 500;
+            width: 100%;
+            text-align: center;
+        }
+        .file-upload-label:hover {
+            border-color: var(--accent-1);
+            color: var(--text-primary);
+        }
+        .file-upload-label .file-name {
+            color: var(--accent-1);
+            font-weight: 700;
+        }
         @media (max-width: 600px) {
             .main-container { padding: 0 14px; }
             .input-section { padding: 18px; }
@@ -432,7 +468,7 @@
                 <span class="gradient-text">Sonic</span> API Center
             </h1>
             <p class="hero-subtitle">
-                منصة متكاملة تضم أقوى الـ APIs للمطورين. اختر الخدمة، أدخل الرابط، واحصل على النتيجة
+                منصة متكاملة تضم أقوى الـ APIs للمطورين. اختر الخدمة، أدخل البيانات، واحصل على النتيجة
             </p>
         </section>
 
@@ -448,31 +484,37 @@
                 YouTube
                 <span class="tab-status">نشط</span>
             </button>
-            <button class="api-tab" data-api="tiktok">
-                <i class="fa-brands fa-tiktok"></i>
-                TikTok
-                <span class="tab-status soon">قريباً</span>
+            <button class="api-tab" data-api="ai-image">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                AI Image
+                <span class="tab-status">نشط</span>
             </button>
-            <button class="api-tab" data-api="ai">
-                <i class="fa-solid fa-brain"></i>
-                AI Chat
-                <span class="tab-status soon">قريباً</span>
+            <button class="api-tab" data-api="img2prompt">
+                <i class="fa-regular fa-image"></i>
+                Image→Prompt
+                <span class="tab-status">نشط</span>
+            </button>
+            <button class="api-tab" data-api="wallpaper">
+                <i class="fa-regular fa-pen-to-square"></i>
+                خلفية عشوائية
+                <span class="tab-status">نشط</span>
+            </button>
+            <button class="api-tab" data-api="write">
+                <i class="fa-regular fa-pen-to-square"></i>
+                كتابة على ورق
+                <span class="tab-status">نشط</span>
             </button>
         </div>
 
         <!-- Input Section -->
-        <div class="input-section">
+        <div class="input-section" id="inputSection">
             <div class="input-label">
-                <i class="fa-solid fa-link"></i>
-                <span>رابط</span>
+                <i class="fa-solid fa-link" id="inputIcon"></i>
+                <span id="inputLabel">رابط</span>
                 <span class="api-name" id="apiNameLabel">Instagram</span>
             </div>
-            <div class="input-group">
-                <input type="text" id="urlInput" placeholder="https://www.instagram.com/reel/C7Xxyz123/">
-                <button class="btn" id="downloadBtn">
-                    <span class="spinner"></span>
-                    <span class="btn-text"><i class="fa-solid fa-play"></i> تنفيذ</span>
-                </button>
+            <div class="input-group" id="inputGroup">
+                <!-- سيتم إدخال المحتوى هنا ديناميكياً بواسطة JavaScript -->
             </div>
             <div class="examples" id="exampleContainer">
                 مثال: 
@@ -526,6 +568,19 @@
                 </div>
             </div>
 
+            <!-- عرض الصورة مباشرة لـ Wallpaper و Write -->
+            <div class="result-card" id="imageResultCard" style="display:none;">
+                <div class="card-title">
+                    <i class="fa-regular fa-image"></i>
+                    الصورة الناتجة
+                </div>
+                <div style="text-align:center; padding:10px;">
+                    <img id="resultImage" src="" alt="Result Image" style="max-width:100%; max-height:400px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                    <br>
+                    <a id="resultImageDownload" href="#" download target="_blank" class="btn" style="display:inline-block; margin-top:10px; padding:8px 20px; background:var(--gradient-main); color:white; border-radius:var(--radius-full); text-decoration:none; font-weight:700;">⬇️ تحميل الصورة</a>
+                </div>
+            </div>
+
         </div>
 
         <!-- Footer -->
@@ -537,7 +592,7 @@
 
     <script>
         // ═══════════════════════════════════════════════════════════════
-        // 📦 قاعدة بيانات الـ APIs (Instagram + YouTube + قريباً)
+        // 📦 قاعدة بيانات الـ APIs
         // ═══════════════════════════════════════════════════════════════
         const apis = {
             instagram: {
@@ -548,7 +603,9 @@
                 placeholder: 'https://www.instagram.com/reel/C7Xxyz123/',
                 example: 'https://www.instagram.com/reel/C7Xxyz123/',
                 status: 'active',
-                method: 'GET'
+                method: 'GET',
+                inputType: 'url',
+                label: 'رابط انستقرام'
             },
             youtube: {
                 id: 'youtube',
@@ -558,27 +615,58 @@
                 placeholder: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 example: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 status: 'active',
-                method: 'GET'
+                method: 'GET',
+                inputType: 'url',
+                label: 'رابط يوتيوب'
             },
-            tiktok: {
-                id: 'tiktok',
-                name: 'TikTok',
-                icon: 'fa-brands fa-tiktok',
-                endpoint: '/api/tiktok',
-                placeholder: 'https://www.tiktok.com/@user/video/xxx',
-                example: 'https://www.tiktok.com/@user/video/123456789',
-                status: 'soon',
-                method: 'GET'
+            'ai-image': {
+                id: 'ai-image',
+                name: 'AI Image Editor',
+                icon: 'fa-solid fa-wand-magic-sparkles',
+                endpoint: '/api/ai-image',
+                placeholder: 'ادخل وصف التعديل (مثال: اجعلها كرتونية)',
+                example: 'اجعل الصورة كرتونية',
+                status: 'active',
+                method: 'POST',
+                inputType: 'file+text',
+                label: 'وصف التعديل',
+                fileLabel: 'اختر صورة'
             },
-            ai: {
-                id: 'ai',
-                name: 'AI Chat',
-                icon: 'fa-solid fa-brain',
-                endpoint: '/api/ai/chat',
-                placeholder: 'اكتب سؤالك هنا...',
-                example: 'ما هو الذكاء الاصطناعي؟',
-                status: 'soon',
-                method: 'POST'
+            img2prompt: {
+                id: 'img2prompt',
+                name: 'Image to Prompt',
+                icon: 'fa-regular fa-image',
+                endpoint: '/api/img2prompt',
+                placeholder: 'https://example.com/image.jpg',
+                example: 'https://raw.githubusercontent.com/node-form-data/form-data/master/test/data/example.gif',
+                status: 'active',
+                method: 'GET',
+                inputType: 'url',
+                label: 'رابط الصورة'
+            },
+            wallpaper: {
+                id: 'wallpaper',
+                name: 'Random Wallpaper',
+                icon: 'fa-regular fa-pen-to-square',
+                endpoint: '/api/wallpaper',
+                placeholder: '',
+                example: '',
+                status: 'active',
+                method: 'GET',
+                inputType: 'none',
+                label: 'احصل على خلفية عشوائية'
+            },
+            write: {
+                id: 'write',
+                name: 'Write on Paper',
+                icon: 'fa-regular fa-pen-to-square',
+                endpoint: '/api/write',
+                placeholder: 'اكتب النص الذي تريد كتابته على الورق',
+                example: 'Sonic Bot is here',
+                status: 'active',
+                method: 'GET',
+                inputType: 'text',
+                label: 'النص المطلوب'
             }
         };
 
@@ -586,20 +674,24 @@
         // 🔧 المتغيرات
         // ═══════════════════════════════════════════════════════════════
         let currentApi = 'instagram';
+        let selectedFile = null;
 
         // ═══════════════════════════════════════════════════════════════
         // 🔧 DOM Elements
         // ═══════════════════════════════════════════════════════════════
-        const urlInput = document.getElementById('urlInput');
-        const downloadBtn = document.getElementById('downloadBtn');
+        const inputGroup = document.getElementById('inputGroup');
+        const exampleLink = document.getElementById('exampleLink');
+        const apiNameLabel = document.getElementById('apiNameLabel');
+        const inputLabel = document.getElementById('inputLabel');
+        const inputIcon = document.getElementById('inputIcon');
         const resultSection = document.getElementById('resultSection');
         const previewCode = document.getElementById('previewCode');
         const curlCode = document.getElementById('curlCode');
         const jsCode = document.getElementById('jsCode');
         const responseTime = document.getElementById('responseTime');
-        const exampleLink = document.getElementById('exampleLink');
-        const exampleContainer = document.getElementById('exampleContainer');
-        const apiNameLabel = document.getElementById('apiNameLabel');
+        const resultImage = document.getElementById('resultImage');
+        const resultImageDownload = document.getElementById('resultImageDownload');
+        const imageResultCard = document.getElementById('imageResultCard');
 
         // ═══════════════════════════════════════════════════════════════
         // 🏷️ تبديل الـ API
@@ -618,43 +710,106 @@
             if (!api) return;
 
             apiNameLabel.textContent = api.name;
-            urlInput.placeholder = api.placeholder;
-            exampleLink.textContent = api.example;
-            exampleLink.dataset.example = api.example;
+            inputLabel.textContent = api.label || 'رابط';
+            inputIcon.className = api.icon;
+
+            // بناء واجهة الإدخال حسب النوع
+            let inputHTML = '';
+            if (api.inputType === 'none') {
+                // زر فقط
+                inputHTML = `<button class="btn" id="actionBtn"><span class="btn-text"><i class="fa-solid fa-play"></i> تنفيذ</span><span class="spinner"></span></button>`;
+            } else if (api.inputType === 'file+text') {
+                // ملف + نص
+                inputHTML = `
+                    <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="fileInput" accept="image/*">
+                            <label class="file-upload-label" for="fileInput">
+                                <i class="fa-regular fa-cloud-arrow-up"></i> اختر صورة <span class="file-name" id="fileName">(لم يتم الاختيار)</span>
+                            </label>
+                        </div>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                            <input type="text" id="textInput" placeholder="${api.placeholder}" style="flex:1; min-width:200px;">
+                            <button class="btn" id="actionBtn"><span class="btn-text"><i class="fa-solid fa-play"></i> تنفيذ</span><span class="spinner"></span></button>
+                        </div>
+                    </div>
+                `;
+            } else if (api.inputType === 'url' || api.inputType === 'text') {
+                // نص عادي أو رابط
+                inputHTML = `
+                    <input type="text" id="textInput" placeholder="${api.placeholder}" style="flex:1; min-width:200px;">
+                    <button class="btn" id="actionBtn"><span class="btn-text"><i class="fa-solid fa-play"></i> تنفيذ</span><span class="spinner"></span></button>
+                `;
+            }
+
+            inputGroup.innerHTML = inputHTML;
+
+            // تعيين المثال
+            if (api.example) {
+                exampleLink.textContent = api.example;
+                exampleLink.style.display = 'inline';
+            } else {
+                exampleLink.style.display = 'none';
+            }
 
             // إخفاء النتائج السابقة
             resultSection.classList.remove('active');
             previewCode.innerHTML = `<span class="comment">// انتظر تنفيذ الطلب...</span>`;
             curlCode.innerHTML = `<span class="comment"># انتظر تنفيذ الطلب...</span>`;
             jsCode.innerHTML = `<span class="comment">// انتظر تنفيذ الطلب...</span>`;
-            urlInput.value = '';
+            imageResultCard.style.display = 'none';
+            resultImage.src = '';
+
+            // ربط الأحداث
+            const actionBtn = document.getElementById('actionBtn');
+            if (actionBtn) {
+                actionBtn.addEventListener('click', executeApi);
+            }
+
+            const textInput = document.getElementById('textInput');
+            if (textInput) {
+                textInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') executeApi();
+                });
+            }
+
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        selectedFile = file;
+                        document.getElementById('fileName').textContent = file.name;
+                    }
+                });
+            }
+
+            // حدث المثال
+            exampleLink.onclick = () => {
+                const api = apis[currentApi];
+                if (api.status === 'soon') {
+                    showToast('warning', '⏳ قريباً', `${api.name} API قيد التطوير`);
+                    return;
+                }
+                if (api.inputType === 'url' || api.inputType === 'text') {
+                    const input = document.getElementById('textInput');
+                    if (input) input.value = api.example;
+                    executeApi();
+                } else if (api.inputType === 'none') {
+                    executeApi();
+                } else if (api.inputType === 'file+text') {
+                    const input = document.getElementById('textInput');
+                    if (input) input.value = api.example;
+                    // لا نستطيع تعيين ملف تلقائياً، نطلب من المستخدم رفعه
+                    showToast('info', '📂', 'يرجى اختيار صورة ثم تنفيذ الطلب');
+                }
+            };
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // 📝 مثال للاختبار
+        // 🚀 تنفيذ الـ API
         // ═══════════════════════════════════════════════════════════════
-        exampleLink.addEventListener('click', () => {
-            const api = apis[currentApi];
-            if (api.status === 'soon') {
-                showToast('warning', '⏳ قريباً', `${api.name} API قيد التطوير`);
-                return;
-            }
-            urlInput.value = api.example;
-            downloadMedia();
-        });
-
-        // ═══════════════════════════════════════════════════════════════
-        // ⌨️ Events
-        // ═══════════════════════════════════════════════════════════════
-        urlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') downloadMedia();
-        });
-        downloadBtn.addEventListener('click', downloadMedia);
-
-        // ═══════════════════════════════════════════════════════════════
-        // 📥 دالة التحميل الرئيسية
-        // ═══════════════════════════════════════════════════════════════
-        async function downloadMedia() {
+        async function executeApi() {
             const api = apis[currentApi];
             if (!api) return;
 
@@ -663,52 +818,146 @@
                 return;
             }
 
-            const input = urlInput.value.trim();
-            if (!input) {
-                showToast('error', '❌ خطأ', `يرجى إدخال ${api.name} المناسب`);
-                return;
+            const actionBtn = document.getElementById('actionBtn');
+            if (!actionBtn) return;
+
+            // تحضير البيانات
+            let inputValue = '';
+            let file = null;
+
+            if (api.inputType === 'url' || api.inputType === 'text') {
+                const input = document.getElementById('textInput');
+                if (!input) return;
+                inputValue = input.value.trim();
+                if (!inputValue) {
+                    showToast('error', '❌ خطأ', `يرجى إدخال ${api.label}`);
+                    return;
+                }
+            } else if (api.inputType === 'file+text') {
+                const input = document.getElementById('textInput');
+                if (!input) return;
+                inputValue = input.value.trim();
+                if (!inputValue) {
+                    showToast('error', '❌ خطأ', 'يرجى إدخال وصف التعديل');
+                    return;
+                }
+                if (!selectedFile) {
+                    showToast('error', '❌ خطأ', 'يرجى اختيار صورة');
+                    return;
+                }
+                file = selectedFile;
+            } else if (api.inputType === 'none') {
+                // لا نحتاج إدخال
             }
 
             // إظهار حالة التحميل
-            downloadBtn.classList.add('loading');
-            downloadBtn.disabled = true;
+            actionBtn.classList.add('loading');
+            actionBtn.disabled = true;
             resultSection.classList.remove('active');
             previewCode.textContent = '⏳ جاري التحميل...';
             curlCode.textContent = '⏳ جاري التحميل...';
             jsCode.textContent = '⏳ جاري التحميل...';
+            imageResultCard.style.display = 'none';
 
             try {
-                const encodedInput = encodeURIComponent(input);
-                const apiUrl = `${api.endpoint}?url=${encodedInput}`;
-                const startTime = performance.now();
+                let url = `${api.endpoint}`;
+                let options = {
+                    method: api.method,
+                    headers: {}
+                };
 
-                const response = await fetch(apiUrl);
+                // بناء الطلب حسب النوع
+                if (api.id === 'wallpaper' || api.id === 'write') {
+                    // هذه الـ APIs تعيد صورة مباشرة
+                    if (api.id === 'write') {
+                        url += `?text=${encodeURIComponent(inputValue)}`;
+                    }
+                    // نستخدم fetch للحصول على الصورة
+                    const startTime = performance.now();
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        let errMsg = 'حدث خطأ';
+                        try {
+                            const errData = await response.json();
+                            errMsg = errData.error || errData.message || errMsg;
+                        } catch(e) {}
+                        throw new Error(errMsg);
+                    }
+                    const blob = await response.blob();
+                    const imageUrl = URL.createObjectURL(blob);
+                    const endTime = performance.now();
+                    const time = ((endTime - startTime)/1000).toFixed(2);
+                    responseTime.textContent = `⏱️ ${time}s`;
+
+                    // عرض الصورة
+                    resultImage.src = imageUrl;
+                    resultImageDownload.href = imageUrl;
+                    resultImageDownload.download = `${api.id}_${Date.now()}.png`;
+                    imageResultCard.style.display = 'block';
+                    resultSection.classList.add('active');
+                    previewCode.textContent = `// تم تحميل الصورة بنجاح (${time}s)`;
+                    curlCode.textContent = `curl -X GET "${window.location.origin}${url}" --output image.png`;
+                    jsCode.textContent = `// تحميل الصورة
+fetch('${window.location.origin}${url}')
+  .then(res => res.blob())
+  .then(blob => {
+    const img = URL.createObjectURL(blob);
+    document.getElementById('preview').src = img;
+  });`;
+                    showToast('success', '✅ تم بنجاح', 'تم تحميل الصورة');
+                    return;
+                }
+
+                // باقي الـ APIs ترجع JSON
+                if (api.inputType === 'file+text') {
+                    // رفع ملف مع النص
+                    const formData = new FormData();
+                    formData.append('prompt', inputValue);
+                    formData.append('file', file);
+                    options.body = formData;
+                    // لا نضع Content-Type لأن FormData يحددها تلقائياً
+                } else if (api.inputType === 'url' || api.inputType === 'text') {
+                    // إضافة المعامل في الرابط
+                    if (api.id === 'instagram' || api.id === 'youtube' || api.id === 'img2prompt') {
+                        url += `?url=${encodeURIComponent(inputValue)}`;
+                    }
+                    // لـ ai-image (GET) نضيف imageUrl و prompt
+                    if (api.id === 'ai-image' && api.inputType === 'url') {
+                        // ولكننا نستخدم POST مع ملف، لذا لا ندخل هنا
+                    }
+                }
+
+                const startTime = performance.now();
+                const response = await fetch(url, options);
+                const endTime = performance.now();
+                const time = ((endTime - startTime)/1000).toFixed(2);
+                responseTime.textContent = `⏱️ ${time}s`;
 
                 if (!response.ok) {
-                    let errMsg = 'حدث خطأ في الخادم';
+                    let errMsg = 'حدث خطأ';
                     try {
                         const errData = await response.json();
-                        errMsg = errData.error || errMsg;
-                    } catch (e) {}
+                        errMsg = errData.error || errData.message || errMsg;
+                    } catch(e) {}
                     throw new Error(errMsg);
                 }
 
                 const data = await response.json();
 
-                if (!data.success) {
-                    throw new Error(data.error || 'فشل تنفيذ الطلب');
-                }
-
-                const endTime = performance.now();
-                const responseTimeMs = ((endTime - startTime) / 1000).toFixed(2);
-                responseTime.textContent = `⏱️ ${responseTimeMs}s`;
-
                 // عرض النتائج
-                displayResults(data, input, api);
+                const jsonStr = JSON.stringify(data, null, 2);
+                previewCode.innerHTML = syntaxHighlight(jsonStr);
 
-                // إظهار القسم
+                const curlCmd = `curl -X ${api.method} "${window.location.origin}${url}"`;
+                curlCode.innerHTML = `<span class="comment"># ${api.name} API</span>\n${curlCmd}`;
+
+                const jsExample = `// ${api.name} API
+fetch('${window.location.origin}${url}')
+  .then(res => res.json())
+  .then(data => console.log(data));`;
+                jsCode.innerHTML = syntaxHighlight(jsExample);
+
                 resultSection.classList.add('active');
-
                 showToast('success', '✅ تم بنجاح', 'تم تنفيذ الطلب');
 
             } catch (error) {
@@ -718,32 +967,9 @@
                 resultSection.classList.add('active');
                 showToast('error', '❌ فشل', error.message);
             } finally {
-                downloadBtn.classList.remove('loading');
-                downloadBtn.disabled = false;
+                actionBtn.classList.remove('loading');
+                actionBtn.disabled = false;
             }
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // 📊 عرض النتائج
-        // ═══════════════════════════════════════════════════════════════
-        function displayResults(data, input, api) {
-            const baseUrl = window.location.origin;
-            const encodedInput = encodeURIComponent(input);
-
-            // 1. PREVIEW Response
-            const jsonStr = JSON.stringify(data, null, 2);
-            previewCode.innerHTML = syntaxHighlight(jsonStr);
-
-            // 2. CURL Command
-            const curlCmd = `curl -X ${api.method || 'GET'} "${baseUrl}${api.endpoint}?url=${encodedInput}"`;
-            curlCode.innerHTML = `<span class="comment"># ${api.name} API</span>\n${curlCmd}`;
-
-            // 3. JavaScript Example
-            const jsExample = `// ${api.name} API
-fetch('${baseUrl}${api.endpoint}?url=${encodedInput}')
-  .then(res => res.json())
-  .then(data => console.log(data));`;
-            jsCode.innerHTML = syntaxHighlight(jsExample);
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -811,7 +1037,7 @@ fetch('${baseUrl}${api.endpoint}?url=${encodedInput}')
         // ═══════════════════════════════════════════════════════════════
         updateApiUI();
         console.log('🚀 Sonic API Center ready!');
-        console.log('📚 APIs متاحة:', Object.keys(apis).length);
+        console.log('📚 APIs متاحة:', Object.keys(apis).filter(k => apis[k].status === 'active').length);
         console.log('💡 لإضافة APIs جديدة، أضفها في مصفوفة apis');
     </script>
 </body>
