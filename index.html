@@ -1,1025 +1,1397 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic API Center</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SONIC API — Cyberpunk Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
-        /* ===== نفس الـ Styles السابق ===== */
-        * {
+        /* ═══════════════════════════════════════════════════
+           🌑 CSS VARIABLES — CYBERPUNK DARK THEME
+           ═══════════════════════════════════════════════════ */
+        :root {
+            --bg-primary: #080810;
+            --bg-secondary: #0b0b16;
+            --bg-card: rgba(18, 18, 37, 0.75);
+            --bg-card-hover: rgba(30, 30, 60, 0.85);
+            --bg-input: rgba(10, 10, 25, 0.8);
+            --bg-code: #06060c;
+            --border-color: rgba(157, 78, 221, 0.15);
+            --border-glow: rgba(157, 78, 221, 0.35);
+            --text-primary: #f0eaff;
+            --text-secondary: #a99bc4;
+            --text-muted: #5f4e7a;
+            --accent-purple: #8a2be2;
+            --accent-glow: #9d4edd;
+            --accent-dim: rgba(157, 78, 221, 0.12);
+            --accent-bright: #b37ef7;
+            --success: #00e676;
+            --warning: #ffab40;
+            --danger: #ff5252;
+            --gradient-main: linear-gradient(135deg, #7c3aed 0%, #a855f7 60%, #d946ef 100%);
+            --shadow-glow: 0 0 40px rgba(157, 78, 221, 0.12);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 9999px;
+            --font-main: 'Tajawal', sans-serif;
+            --font-mono: 'Courier New', monospace;
+            --header-height: 68px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           🔄 RESET & BASE
+           ═══════════════════════════════════════════════════ */
+        *,
+        *::before,
+        *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        :root {
-            --bg-primary: #0a0a1a;
-            --bg-secondary: #0f0f2a;
-            --bg-card: rgba(255,255,255,0.03);
-            --bg-card-hover: rgba(255,255,255,0.07);
-            --border-color: rgba(255,255,255,0.06);
-            --border-hover: rgba(118,75,162,0.5);
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0c0;
-            --text-muted: #5a5a7a;
-            --accent-1: #667eea;
-            --accent-2: #764ba2;
-            --accent-3: #f093fb;
-            --accent-4: #4facfe;
-            --success: #00e676;
-            --warning: #ffab40;
-            --danger: #ff5252;
-            --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            --radius-sm: 8px;
-            --radius-md: 14px;
-            --radius-lg: 20px;
-            --radius-full: 9999px;
-            --font-main: 'Tajawal', sans-serif;
-            --header-height: 70px;
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
         }
         body {
             font-family: var(--font-main);
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
-            padding-top: var(--header-height);
+            overflow-x: hidden;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background 0.4s, color 0.4s;
         }
+        ::selection {
+            background: rgba(157, 78, 221, 0.4);
+            color: #fff;
+        }
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-glow);
+            border-radius: var(--radius-full);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-bright);
+        }
+        a {
+            color: var(--accent-bright);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        a:hover {
+            color: #fff;
+        }
+        button {
+            font-family: var(--font-main);
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+        input,
+        textarea {
+            font-family: var(--font-main);
+            outline: none;
+            border: none;
+        }
+
+        /* ═══════════════════════════════════════════════════
+           💜 SPLASH / LOADING SCREEN
+           ═══════════════════════════════════════════════════ */
+        #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .splash-brand {
+            font-size: clamp(2.8rem, 8vw, 5rem);
+            font-weight: 900;
+            letter-spacing: 4px;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glowPulse 2s ease-in-out infinite alternate;
+            position: relative;
+        }
+        .splash-brand::after {
+            content: '✦';
+            position: absolute;
+            right: -1.2em;
+            top: -0.2em;
+            font-size: 0.5em;
+            -webkit-text-fill-color: initial;
+            color: var(--accent-glow);
+            animation: spinGlow 3s linear infinite;
+        }
+        @keyframes glowPulse {
+            0% {
+                filter: drop-shadow(0 0 20px rgba(157, 78, 221, 0.2));
+            }
+            100% {
+                filter: drop-shadow(0 0 60px rgba(157, 78, 221, 0.5));
+            }
+        }
+        @keyframes spinGlow {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+            50% {
+                transform: rotate(180deg) scale(1.2);
+            }
+            100% {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+        .splash-sub {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-top: 8px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            opacity: 0.6;
+        }
+        .splash-bar-wrap {
+            width: 220px;
+            height: 3px;
+            background: rgba(157, 78, 221, 0.15);
+            border-radius: var(--radius-full);
+            margin-top: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+        .splash-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--gradient-main);
+            border-radius: var(--radius-full);
+            animation: loadBar 1.8s ease-in-out forwards;
+        }
+        @keyframes loadBar {
+            0% {
+                width: 0%;
+            }
+            60% {
+                width: 70%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════
+           🧭 NAVBAR
+           ═══════════════════════════════════════════════════ */
         .navbar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             height: var(--header-height);
-            background: rgba(10,10,26,0.9);
-            backdrop-filter: blur(20px);
+            background: rgba(8, 8, 16, 0.82);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
             border-bottom: 1px solid var(--border-color);
             z-index: 9000;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 30px;
+            padding: 0 28px;
+            transition: var(--transition);
+        }
+        .navbar.scrolled {
+            background: rgba(8, 8, 16, 0.96);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
         }
         .nav-brand {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 20px;
-            font-weight: 800;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 900;
             color: var(--text-primary);
-            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .nav-brand .brand-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--accent-glow);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--accent-glow);
+            animation: pulseDot 2s infinite;
+        }
+        @keyframes pulseDot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
         }
         .nav-brand .brand-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-md);
-            background: var(--gradient-main);
+            font-size: 1.4rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .nav-battery {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px 4px 10px;
+            border-radius: var(--radius-full);
+            background: rgba(157, 78, 221, 0.08);
+            border: 1px solid rgba(157, 78, 221, 0.15);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+        .nav-battery i {
+            color: var(--accent-glow);
+            font-size: 0.9rem;
+        }
+        .nav-battery .batt-num {
+            color: var(--text-primary);
+        }
+        .theme-toggle {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            transition: var(--transition);
         }
-        .nav-status {
-            color: var(--text-secondary);
-            font-size: 13px;
+        .theme-toggle:hover {
+            background: rgba(157, 78, 221, 0.15);
+            color: var(--text-primary);
+            border-color: var(--border-glow);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           🏠 HERO BANNER
+           ═══════════════════════════════════════════════════ */
+        .hero-section {
+            padding-top: calc(var(--header-height) + 28px);
+            padding-bottom: 20px;
+        }
+        .hero-banner {
+            position: relative;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: linear-gradient(145deg, #0d0d1f, #151530);
+            border: 1px solid var(--border-color);
+            padding: 32px 36px;
+            min-height: 200px;
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            gap: 20px;
+            box-shadow: var(--shadow-card), var(--shadow-glow);
         }
-        .nav-status .dot {
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 80% 20%, rgba(157, 78, 221, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(138, 43, 226, 0.05) 0%, transparent 50%);
+            pointer-events: none;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+        /* Anime character silhouette — pure CSS art */
+        .hero-banner::after {
+            content: '⚡';
+            position: absolute;
+            bottom: -10px;
+            left: 10%;
+            font-size: 12rem;
+            opacity: 0.03;
+            pointer-events: none;
+            transform: rotate(-8deg);
         }
-        .main-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 24px;
+        .hero-left {
+            position: relative;
+            z-index: 1;
+            flex: 1 1 280px;
         }
-        .hero {
-            padding: 30px 0 20px;
-            text-align: center;
+        .hero-left .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 16px 4px 12px;
+            border-radius: var(--radius-full);
+            background: rgba(157, 78, 221, 0.08);
+            border: 1px solid rgba(157, 78, 221, 0.12);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent-bright);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
         }
-        .hero-icon {
-            font-size: 56px;
-            margin-bottom: 6px;
+        .hero-left .hero-badge i {
+            font-size: 0.6rem;
         }
-        .hero-title {
-            font-size: clamp(28px, 4vw, 40px);
+        .hero-left h1 {
+            font-size: clamp(1.8rem, 4.5vw, 3.2rem);
             font-weight: 900;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
         }
-        .hero-title .gradient-text {
+        .hero-left h1 .highlight {
             background: var(--gradient-main);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .hero-subtitle {
-            font-size: 15px;
+        .hero-left p {
             color: var(--text-secondary);
-            max-width: 550px;
-            margin: 6px auto 20px;
+            font-size: 0.95rem;
+            margin-top: 6px;
+            max-width: 420px;
         }
-        .api-selector {
+        .hero-actions {
             display: flex;
-            gap: 12px;
-            justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-top: 16px;
         }
-        .api-selector .api-tab {
-            padding: 10px 24px;
+        .hero-actions .hbtn {
+            padding: 6px 18px;
             border-radius: var(--radius-full);
-            background: var(--bg-card);
-            border: 2px solid var(--border-color);
+            border: 1px solid var(--border-color);
+            background: transparent;
             color: var(--text-secondary);
-            font-size: 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        .hero-actions .hbtn:hover {
+            border-color: var(--accent-glow);
+            color: var(--text-primary);
+            background: rgba(157, 78, 221, 0.06);
+        }
+        .hero-actions .hbtn i {
+            font-size: 0.8rem;
+            color: var(--accent-glow);
+        }
+        .hero-right {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .hero-right .credits-badge {
+            padding: 6px 18px 6px 14px;
+            border-radius: var(--radius-full);
+            background: rgba(157, 78, 221, 0.06);
+            border: 1px solid rgba(157, 78, 221, 0.1);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .hero-right .credits-badge i {
+            color: var(--accent-glow);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           🔍 SEARCH & CATEGORIES
+           ═══════════════════════════════════════════════════ */
+        .search-section {
+            margin: 20px 0 18px;
+        }
+        .search-wrap {
+            position: relative;
+            max-width: 540px;
+            margin: 0 auto;
+        }
+        .search-wrap i {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            pointer-events: none;
+        }
+        .search-wrap input {
+            width: 100%;
+            padding: 14px 50px 14px 20px;
+            border-radius: var(--radius-full);
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .search-wrap input:focus {
+            border-color: var(--accent-glow);
+            box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.08), 0 0 30px rgba(157, 78, 221, 0.04);
+        }
+        .search-wrap input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .category-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 14px;
+        }
+        .category-pills .pill {
+            padding: 5px 18px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            font-family: var(--font-main);
+            transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-        .api-selector .api-tab:hover {
-            border-color: rgba(255,255,255,0.15);
-            color: var(--text-primary);
-        }
-        .api-selector .api-tab.active {
-            border-color: var(--accent-2);
-            background: rgba(118,75,162,0.15);
-            color: var(--text-primary);
-            box-shadow: 0 0 20px rgba(118,75,162,0.15);
-        }
-        .api-selector .api-tab .tab-status {
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: var(--radius-full);
-            background: rgba(0,230,118,0.1);
-            color: var(--success);
-        }
-        .api-selector .api-tab .tab-status.soon {
-            background: rgba(255,171,64,0.1);
-            color: var(--warning);
-        }
-        .input-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 24px 28px;
-            margin-bottom: 24px;
-            transition: all 0.3s;
-        }
-        .input-section:hover {
-            border-color: var(--border-hover);
-            background: var(--bg-card-hover);
-        }
-        .input-section .input-label {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-secondary);
-        }
-        .input-section .input-label i {
-            color: var(--accent-1);
-        }
-        .input-section .input-label .api-name {
-            color: var(--text-primary);
-        }
-        .input-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .input-group input, .input-group textarea {
-            flex: 1;
-            padding: 14px 18px;
-            border-radius: var(--radius-md);
-            background: rgba(255,255,255,0.04);
-            border: 2px solid var(--border-color);
-            color: var(--text-primary);
-            font-size: 14px;
+            gap: 6px;
             font-family: var(--font-main);
-            transition: all 0.3s;
-            min-width: 200px;
         }
-        .input-group input:focus, .input-group textarea:focus {
-            border-color: var(--accent-1);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        .category-pills .pill:hover {
+            border-color: var(--border-glow);
+            color: var(--text-primary);
+            background: rgba(157, 78, 221, 0.04);
         }
-        .input-group input::placeholder, .input-group textarea::placeholder {
-            color: var(--text-muted);
+        .category-pills .pill.active {
+            background: rgba(157, 78, 221, 0.10);
+            border-color: var(--accent-glow);
+            color: var(--text-primary);
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.06);
         }
-        .input-group .btn {
-            padding: 14px 32px;
-            border-radius: var(--radius-md);
-            background: var(--gradient-main);
-            color: white;
-            font-weight: 700;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: var(--font-main);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-        .input-group .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(118,75,162,0.3);
-        }
-        .input-group .btn:disabled {
+        .category-pills .pill .count {
+            font-size: 0.6rem;
             opacity: 0.5;
-            cursor: not-allowed;
+            font-weight: 400;
         }
-        .input-group .btn .spinner {
-            display: none;
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
+
+        /* ═══════════════════════════════════════════════════
+           📦 ACCORDION — API ENDPOINTS
+           ═══════════════════════════════════════════════════ */
+        .accordion-section {
+            margin: 18px 0 40px;
         }
-        .input-group .btn.loading .spinner { display: block; }
-        .input-group .btn.loading .btn-text { display: none; }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .examples {
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-        .examples a {
-            color: var(--accent-1);
-            cursor: pointer;
-            text-decoration: underline;
-            transition: all 0.3s;
-        }
-        .examples a:hover { color: var(--accent-3); }
-        .result-section {
-            display: none;
-            animation: fadeIn 0.4s ease-out;
-        }
-        .result-section.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .result-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            margin-bottom: 20px;
-        }
-        .result-card .card-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 12px;
+        .accordion-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
             gap: 10px;
             color: var(--text-secondary);
         }
-        .result-card .card-title i {
-            color: var(--accent-1);
+        .accordion-title i {
+            color: var(--accent-glow);
         }
-        .result-card .card-title .badge-time {
-            font-size: 12px;
-            color: var(--text-muted);
+        .accordion-title span {
+            font-size: 0.7rem;
             font-weight: 400;
+            color: var(--text-muted);
             margin-right: auto;
         }
-        .code-block {
-            background: rgba(0,0,0,0.4);
+
+        .accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .accordion-item {
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            padding: 16px;
-            position: relative;
-            overflow-x: auto;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(4px);
         }
-        .code-block .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            padding: 4px 12px;
-            border-radius: var(--radius-sm);
+        .accordion-item:hover {
+            border-color: var(--border-glow);
+        }
+        .accordion-item.open {
+            border-color: var(--accent-glow);
+            box-shadow: 0 0 40px rgba(157, 78, 221, 0.06), var(--shadow-card);
+        }
+
+        .accordion-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
             cursor: pointer;
-            font-size: 11px;
+            user-select: none;
+            transition: var(--transition);
+            background: transparent;
+            width: 100%;
+            text-align: right;
             font-family: var(--font-main);
-            transition: all 0.3s;
-        }
-        .code-block .copy-btn:hover {
-            background: rgba(255,255,255,0.1);
             color: var(--text-primary);
         }
-        .code-block code {
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
+        .accordion-header:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .accordion-header .method-badge {
+            padding: 2px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.6rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+        .method-badge.get {
+            background: rgba(0, 230, 118, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(0, 230, 118, 0.15);
+        }
+        .method-badge.post {
+            background: rgba(157, 78, 221, 0.12);
+            color: var(--accent-bright);
+            border: 1px solid rgba(157, 78, 221, 0.15);
+        }
+        .method-badge.put {
+            background: rgba(255, 171, 64, 0.12);
+            color: var(--warning);
+            border: 1px solid rgba(255, 171, 64, 0.15);
+        }
+        .method-badge.delete {
+            background: rgba(255, 82, 82, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(255, 82, 82, 0.15);
+        }
+        .accordion-header .api-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            flex: 1;
+        }
+        .accordion-header .api-status {
+            font-size: 0.6rem;
+            padding: 2px 10px;
+            border-radius: var(--radius-full);
+            background: rgba(0, 230, 118, 0.08);
+            color: var(--success);
+            border: 1px solid rgba(0, 230, 118, 0.1);
+            flex-shrink: 0;
+        }
+        .accordion-header .arrow {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+            flex-shrink: 0;
+            margin-right: auto;
+        }
+        .accordion-item.open .accordion-header .arrow {
+            transform: rotate(180deg);
+            color: var(--accent-glow);
+        }
+
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s;
+            padding: 0 20px;
+        }
+        .accordion-item.open .accordion-body {
+            max-height: 2000px;
+            padding: 0 20px 24px;
+        }
+
+        .accordion-body .api-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-sm);
+            border-right: 2px solid var(--accent-glow);
+        }
+
+        /* Form inside accordion */
+        .api-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .api-form .form-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .api-form .form-row label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 80px;
+        }
+        .api-form .form-row input,
+        .api-form .form-row textarea {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            transition: var(--transition);
+            min-width: 160px;
+            font-family: var(--font-main);
+        }
+        .api-form .form-row input:focus,
+        .api-form .form-row textarea:focus {
+            border-color: var(--accent-glow);
+            box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.08);
+        }
+        .api-form .form-row input::placeholder,
+        .api-form .form-row textarea::placeholder {
+            color: var(--text-muted);
+        }
+        .api-form .form-row textarea {
+            resize: vertical;
+            min-height: 50px;
+        }
+        .file-upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-main);
+        }
+        .file-upload-btn:hover {
+            border-color: var(--accent-glow);
+            color: var(--text-primary);
+        }
+        .file-upload-btn input[type="file"] {
+            display: none;
+        }
+        .file-name-display {
+            font-size: 0.7rem;
+            color: var(--accent-bright);
+            font-weight: 500;
+        }
+
+        /* Request URL box */
+        .req-url-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            background: var(--bg-code);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            margin-top: 6px;
+        }
+        .req-url-box .url-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+        .req-url-box .url-text {
+            flex: 1;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-bright);
+            overflow-x: auto;
+            white-space: nowrap;
+            direction: ltr;
+            text-align: left;
+            padding: 2px 0;
+        }
+        .req-url-box .copy-url-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: 4px;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .req-url-box .copy-url-btn:hover {
+            color: var(--text-primary);
+        }
+
+        /* Execute button */
+        .execute-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            background: var(--gradient-main);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+            font-family: var(--font-main);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .execute-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(157, 78, 221, 0.3);
+        }
+        .execute-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .execute-btn .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .execute-btn.loading .spinner {
+            display: block;
+        }
+        .execute-btn.loading .btn-text {
+            display: none;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Response box */
+        .response-box {
+            margin-top: 14px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: var(--bg-code);
+        }
+        .response-box .resp-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .response-box .resp-status {
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .response-box .resp-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .response-box .resp-status .dot.green {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+        .response-box .resp-status .dot.red {
+            background: var(--danger);
+            box-shadow: 0 0 10px var(--danger);
+        }
+        .response-box .resp-copy {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            font-family: var(--font-main);
+            cursor: pointer;
+        }
+        .response-box .resp-copy:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .response-box .resp-body {
+            padding: 14px;
+            max-height: 320px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
             line-height: 1.8;
             color: var(--text-secondary);
             white-space: pre-wrap;
             word-break: break-all;
             direction: ltr;
             text-align: left;
-            display: block;
         }
-        .code-block .json-key { color: #f093fb; }
-        .code-block .json-string { color: #00e676; }
-        .code-block .json-number { color: #ffab40; }
-        .code-block .json-boolean { color: #4facfe; }
-        .code-block .json-null { color: #ff5252; }
-        .code-block .comment { color: #5a5a7a; font-style: italic; }
-        .code-block .keyword { color: #f093fb; }
-        .code-block .string { color: #00e676; }
-        .code-block .function { color: #4facfe; }
+        .response-box .resp-body .json-key {
+            color: #f093fb;
+        }
+        .response-box .resp-body .json-string {
+            color: #00e676;
+        }
+        .response-box .resp-body .json-number {
+            color: #ffab40;
+        }
+        .response-box .resp-body .json-boolean {
+            color: #4facfe;
+        }
+        .response-box .resp-body .json-null {
+            color: #ff5252;
+        }
+        .response-box .resp-body .comment {
+            color: #5a5a7a;
+            font-style: italic;
+        }
+        .response-box .resp-body .error-text {
+            color: var(--danger);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           🦶 FOOTER
+           ═══════════════════════════════════════════════════ */
+        .site-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 28px 0 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 10px;
+        }
+        .site-footer .footer-brand {
+            font-weight: 800;
+            color: var(--text-secondary);
+        }
+        .site-footer .footer-brand i {
+            color: var(--accent-glow);
+        }
+        .site-footer a {
+            color: var(--accent-bright);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           🍞 TOAST SYSTEM
+           ═══════════════════════════════════════════════════ */
         .toast-container {
             position: fixed;
-            top: 80px;
+            top: calc(var(--header-height) + 16px);
             left: 20px;
-            z-index: 11000;
+            z-index: 99999;
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-width: 320px;
+            max-width: 340px;
         }
         .toast {
             padding: 10px 16px;
             border-radius: var(--radius-md);
-            background: rgba(15,15,42,0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(12, 12, 30, 0.96);
+            backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
-            animation: slideIn 0.3s ease-out;
+            box-shadow: var(--shadow-card);
+            animation: slideIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .toast .toast-title { font-weight: 700; font-size: 13px; }
-        .toast .toast-message { font-size: 12px; color: var(--text-secondary); }
-        .toast.success { border-right: 3px solid var(--success); }
-        .toast.error { border-right: 3px solid var(--danger); }
-        .toast.info { border-right: 3px solid var(--accent-1); }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        .footer {
-            border-top: 1px solid var(--border-color);
-            padding: 25px 0;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 12px;
-            margin-top: 10px;
-        }
-        .footer a {
-            color: var(--accent-1);
-            text-decoration: none;
-        }
-        .footer a:hover { color: var(--accent-3); }
-        /* إضافات لرفع الملفات */
-        .file-upload-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-        .file-upload-wrapper input[type="file"] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-        .file-upload-label {
-            display: inline-block;
-            padding: 10px 18px;
-            background: rgba(255,255,255,0.05);
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-md);
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
-            font-weight: 500;
-            width: 100%;
-            text-align: center;
-        }
-        .file-upload-label:hover {
-            border-color: var(--accent-1);
-            color: var(--text-primary);
-        }
-        .file-upload-label .file-name {
-            color: var(--accent-1);
+        .toast .toast-title {
             font-weight: 700;
+            font-size: 0.8rem;
         }
-        @media (max-width: 600px) {
-            .main-container { padding: 0 14px; }
-            .input-section { padding: 18px; }
-            .input-group { flex-direction: column; }
-            .input-group .btn { width: 100%; justify-content: center; }
-            .result-card { padding: 16px; }
-            .code-block { padding: 12px; font-size: 11px; }
-            .code-block code { font-size: 11px; }
-            .api-selector .api-tab { padding: 8px 16px; font-size: 13px; }
+        .toast .toast-message {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .toast.success {
+            border-right: 3px solid var(--success);
+        }
+        .toast.error {
+            border-right: 3px solid var(--danger);
+        }
+        .toast.info {
+            border-right: 3px solid var(--accent-glow);
+        }
+        .toast.warning {
+            border-right: 3px solid var(--warning);
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-24px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════
+           📱 RESPONSIVE
+           ═══════════════════════════════════════════════════ */
+        @media (max-width: 768px) {
+            :root {
+                --header-height: 60px;
+            }
+            .navbar {
+                padding: 0 16px;
+            }
+            .nav-brand {
+                font-size: 1.1rem;
+            }
+            .nav-battery {
+                font-size: 0.6rem;
+                padding: 2px 10px;
+            }
+            .hero-banner {
+                padding: 22px 18px;
+                min-height: 160px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .hero-left h1 {
+                font-size: 1.6rem;
+            }
+            .hero-actions .hbtn {
+                font-size: 0.65rem;
+                padding: 4px 14px;
+            }
+            .hero-right {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .accordion-header {
+                padding: 12px 14px;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .accordion-header .api-name {
+                font-size: 0.85rem;
+                flex: 1 1 100%;
+                order: 1;
+            }
+            .accordion-header .method-badge {
+                order: 0;
+            }
+            .accordion-header .api-status {
+                order: 2;
+            }
+            .accordion-header .arrow {
+                order: 3;
+                margin-right: 0;
+            }
+            .accordion-body {
+                padding: 0 14px;
+            }
+            .accordion-item.open .accordion-body {
+                padding: 0 14px 18px;
+            }
+            .api-form .form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .api-form .form-row label {
+                min-width: auto;
+            }
+            .req-url-box {
+                flex-wrap: wrap;
+                padding: 8px 12px;
+            }
+            .req-url-box .url-text {
+                font-size: 0.65rem;
+                white-space: normal;
+                word-break: break-all;
+            }
+            .response-box .resp-body {
+                font-size: 0.65rem;
+                max-height: 220px;
+            }
+            .category-pills .pill {
+                font-size: 0.65rem;
+                padding: 3px 12px;
+            }
+            .search-wrap input {
+                font-size: 0.8rem;
+                padding: 12px 44px 12px 16px;
+            }
+            .toast-container {
+                left: 12px;
+                right: 12px;
+                max-width: none;
+            }
+        }
+        @media (max-width: 480px) {
+            .hero-left h1 {
+                font-size: 1.3rem;
+            }
+            .hero-banner {
+                padding: 16px 14px;
+            }
+            .accordion-header {
+                padding: 10px 12px;
+            }
+            .accordion-header .api-name {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════
+           🌙 LIGHT MODE OVERRIDES
+           ═══════════════════════════════════════════════════ */
+        body.light-mode {
+            --bg-primary: #f0edf7;
+            --bg-secondary: #e8e4f0;
+            --bg-card: rgba(255, 255, 255, 0.75);
+            --bg-card-hover: rgba(255, 255, 255, 0.9);
+            --bg-input: rgba(0, 0, 0, 0.03);
+            --bg-code: #f4f2f9;
+            --border-color: rgba(118, 75, 162, 0.12);
+            --border-glow: rgba(118, 75, 162, 0.3);
+            --text-primary: #1a1628;
+            --text-secondary: #5a4a7a;
+            --text-muted: #8a7aaa;
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.06);
+        }
+        body.light-mode .navbar {
+            background: rgba(240, 237, 247, 0.85);
+        }
+        body.light-mode .navbar.scrolled {
+            background: rgba(240, 237, 247, 0.96);
+        }
+        body.light-mode .hero-banner {
+            background: linear-gradient(145deg, #f0edf7, #e8e4f0);
+        }
+        body.light-mode .accordion-item {
+            background: rgba(255, 255, 255, 0.6);
+        }
+        body.light-mode .accordion-item:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        body.light-mode .response-box {
+            background: #f4f2f9;
+        }
+        body.light-mode .req-url-box {
+            background: #f4f2f9;
+        }
+        body.light-mode .toast {
+            background: rgba(255, 255, 255, 0.95);
+        }
+        body.light-mode .file-upload-btn {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        body.light-mode .nav-battery {
+            background: rgba(118, 75, 162, 0.06);
+        }
+        body.light-mode .splash-brand {
+            -webkit-text-fill-color: initial;
+            color: #7c3aed;
+        }
+        body.light-mode .splash-brand::after {
+            -webkit-text-fill-color: initial;
+            color: #7c3aed;
+        }
+
+        /* ═══════════════════════════════════════════════════
+           🔧 UTILITY
+           ═══════════════════════════════════════════════════ */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .text-glow {
+            text-shadow: 0 0 30px rgba(157, 78, 221, 0.15);
+        }
+
+        /* Small loading pulse for items */
+        .pulse-load {
+            animation: pulseLoad 1.2s ease-in-out infinite;
+        }
+        @keyframes pulseLoad {
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-        <a href="#" class="nav-brand">
-            <div class="brand-icon">⚡</div>
-            <span>Sonic API Center</span>
-        </a>
-        <div class="nav-status">
-            <span class="dot"></span>
-            <span>يعمل</span>
-        </div>
-    </nav>
-
-    <!-- Toast -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Main -->
-    <div class="main-container">
-
-        <!-- Hero -->
-        <section class="hero">
-            <div class="hero-icon">🚀</div>
-            <h1 class="hero-title">
-                <span class="gradient-text">Sonic</span> API Center
-            </h1>
-            <p class="hero-subtitle">
-                منصة متكاملة تضم أقوى الـ APIs للمطورين. اختر الخدمة، أدخل البيانات، واحصل على النتيجة
-            </p>
-        </section>
-
-        <!-- API Selector -->
-        <div class="api-selector" id="apiSelector">
-            <button class="api-tab active" data-api="instagram">
-                <i class="fa-brands fa-instagram"></i>
-                Instagram
-                <span class="tab-status">نشط</span>
-            </button>
-            <button class="api-tab" data-api="youtube">
-                <i class="fa-brands fa-youtube"></i>
-                YouTube
-                <span class="tab-status">نشط</span>
-            </button>
-            <button class="api-tab" data-api="ai-image">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                AI Image
-                <span class="tab-status">نشط</span>
-            </button>
-            <button class="api-tab" data-api="img2prompt">
-                <i class="fa-regular fa-image"></i>
-                Image→Prompt
-                <span class="tab-status">نشط</span>
-            </button>
-            <button class="api-tab" data-api="wallpaper">
-                <i class="fa-regular fa-pen-to-square"></i>
-                خلفية عشوائية
-                <span class="tab-status">نشط</span>
-            </button>
-            <button class="api-tab" data-api="write">
-                <i class="fa-regular fa-pen-to-square"></i>
-                كتابة على ورق
-                <span class="tab-status">نشط</span>
-            </button>
-        </div>
-
-        <!-- Input Section -->
-        <div class="input-section" id="inputSection">
-            <div class="input-label">
-                <i class="fa-solid fa-link" id="inputIcon"></i>
-                <span id="inputLabel">رابط</span>
-                <span class="api-name" id="apiNameLabel">Instagram</span>
-            </div>
-            <div class="input-group" id="inputGroup">
-                <!-- سيتم إدخال المحتوى هنا ديناميكياً بواسطة JavaScript -->
-            </div>
-            <div class="examples" id="exampleContainer">
-                مثال: 
-                <a id="exampleLink">https://www.instagram.com/reel/C7Xxyz123/</a>
-            </div>
-        </div>
-
-        <!-- Result Section -->
-        <div class="result-section" id="resultSection">
-
-            <!-- Preview Response -->
-            <div class="result-card">
-                <div class="card-title">
-                    <i class="fa-regular fa-file-code"></i>
-                    PREVIEW Response
-                    <span class="badge-time" id="responseTime"></span>
-                </div>
-                <div class="code-block">
-                    <button class="copy-btn" onclick="copyCode('previewCode')">📋 نسخ</button>
-                    <code id="previewCode">
-<span class="comment">// انتظر تنفيذ الطلب...</span>
-                    </code>
-                </div>
-            </div>
-
-            <!-- CURL Command -->
-            <div class="result-card">
-                <div class="card-title">
-                    <i class="fa-solid fa-terminal"></i>
-                    CURL Command
-                </div>
-                <div class="code-block">
-                    <button class="copy-btn" onclick="copyCode('curlCode')">📋 نسخ</button>
-                    <code id="curlCode">
-<span class="comment"># انتظر تنفيذ الطلب...</span>
-                    </code>
-                </div>
-            </div>
-
-            <!-- JavaScript Example -->
-            <div class="result-card">
-                <div class="card-title">
-                    <i class="fa-brands fa-js"></i>
-                    JavaScript (Fetch)
-                </div>
-                <div class="code-block">
-                    <button class="copy-btn" onclick="copyCode('jsCode')">📋 نسخ</button>
-                    <code id="jsCode">
-<span class="comment">// انتظر تنفيذ الطلب...</span>
-                    </code>
-                </div>
-            </div>
-
-            <!-- عرض الصورة مباشرة لـ Wallpaper و Write -->
-            <div class="result-card" id="imageResultCard" style="display:none;">
-                <div class="card-title">
-                    <i class="fa-regular fa-image"></i>
-                    الصورة الناتجة
-                </div>
-                <div style="text-align:center; padding:10px;">
-                    <img id="resultImage" src="" alt="Result Image" style="max-width:100%; max-height:400px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
-                    <br>
-                    <a id="resultImageDownload" href="#" download target="_blank" class="btn" style="display:inline-block; margin-top:10px; padding:8px 20px; background:var(--gradient-main); color:white; border-radius:var(--radius-full); text-decoration:none; font-weight:700;">⬇️ تحميل الصورة</a>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>⚡ SONIC DEV ❯ | 🇲🇦 — جميع الحقوق محفوظة © 2026</p>
-            <p style="font-size: 11px; margin-top: 4px;">API Services for Developers</p>
+    <!-- ═══════════════════════════════════════════════════════
+    SPLASH SCREEN
+    ═══════════════════════════════════════════════════════ -->
+    <div id="splash" role="status" aria-label="Loading">
+        <div class="splash-brand">SONIC API</div>
+        <div class="splash-sub">⚡ Cyberpunk Gateway</div>
+        <div class="splash-bar-wrap">
+            <div class="splash-bar"></div>
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════
+    NAVBAR
+    ═══════════════════════════════════════════════════════ -->
+    <nav class="navbar" id="navbar" role="navigation">
+        <a href="#" class="nav-brand">
+            <span class="brand-dot"></span>
+            <span class="brand-icon">⚡</span>
+            <span>SONIC API</span>
+        </a>
+        <div class="nav-actions">
+            <div class="nav-battery">
+                <i class="fa-solid fa-bolt"></i>
+                <span class="batt-num">∞</span>
+                <span style="opacity:0.4;font-weight:400;">CREDITS</span>
+            </div>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <i class="fa-regular fa-moon" id="themeIcon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════════════════
+    TOAST CONTAINER
+    ═══════════════════════════════════════════════════════ -->
+    <div class="toast-container" id="toastContainer" role="alert" aria-live="polite"></div>
+
+    <!-- ═══════════════════════════════════════════════════════
+    MAIN CONTENT
+    ═══════════════════════════════════════════════════════ -->
+    <main class="container">
+
+        <!-- HERO BANNER -->
+        <section class="hero-section">
+            <div class="hero-banner">
+                <div class="hero-left">
+                    <div class="hero-badge">
+                        <i class="fa-regular fa-circle-check"></i>
+                        <span>API GATEWAY v2.0</span>
+                    </div>
+                    <h1>
+                        <span class="highlight">SONIC</span>API DOCS
+                    </h1>
+                    <p>استكشف واختبر الـ endpoints المباشرة – مع رفع الملفات المدعوم.</p>
+                    <div class="hero-actions">
+                        <button class="hbtn" onclick="showToast('info','👨‍💻 مطور','SONIC DEV — محمد')">
+                            <i class="fa-regular fa-user"></i> تواصل مع المطور
+                        </button>
+                        <button class="hbtn" onclick="showToast('info','💬 قناة','https://whatsapp.com/channel/0029VbCferaKLaHtHkyEVe1z')">
+                            <i class="fa-regular fa-hashtag"></i> القناة
+                        </button>
+                        <button class="hbtn" onclick="showToast('info','👥 مجموعة','قريباً...')">
+                            <i class="fa-regular fa-users"></i> المجموعة
+                        </button>
+                    </div>
+                </div>
+                <div class="hero-right">
+                    <div class="credits-badge">
+                        <i class="fa-regular fa-gem"></i>
+                        <span>Powered by SONIC DEV 🇲🇦</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEARCH & CATEGORIES -->
+        <section class="search-section">
+            <div class="search-wrap">
+                <i class="fa-regular fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="🔎 ابحث عن endpoint... (Cari endpoint...)" />
+            </div>
+            <div class="category-pills" id="categoryPills">
+                <!-- Generated by JS -->
+            </div>
+        </section>
+
+        <!-- ACCORDION SECTION -->
+        <section class="accordion-section">
+            <div class="accordion-title">
+                <i class="fa-regular fa-bolt"></i>
+                <span>ENDPOINTS</span>
+                <span id="endpointCount">0 متاحة</span>
+            </div>
+            <div class="accordion" id="accordionContainer">
+                <!-- Generated by JS -->
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="site-footer">
+            <div class="footer-brand">
+                <i class="fa-regular fa-bolt"></i> SONIC API CENTER
+            </div>
+            <p style="margin-top:4px;">
+                ⚡ جميع الحقوق محفوظة &copy; 2026 — <a href="#">SONIC DEV 🇲🇦</a>
+            </p>
+        </footer>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════
+    JAVASCRIPT — كامل المنطق مع الحفاظ على الإعدادات الأصلية
+    ═══════════════════════════════════════════════════════ -->
     <script>
-        // ═══════════════════════════════════════════════════════════════
-        // 📦 قاعدة بيانات الـ APIs
-        // ═══════════════════════════════════════════════════════════════
-        const apis = {
+        // ──────────────────────────────────────────────────────────────
+        //  📦 API CONFIGURATIONS (تم الحفاظ عليها كما هي)
+        // ──────────────────────────────────────────────────────────────
+        const apisConfig = {
             instagram: {
                 id: 'instagram',
-                name: 'Instagram',
+                name: 'Instagram Downloader',
                 icon: 'fa-brands fa-instagram',
                 endpoint: '/api/instagram',
-                placeholder: 'https://www.instagram.com/reel/C7Xxyz123/',
-                example: 'https://www.instagram.com/reel/C7Xxyz123/',
-                status: 'active',
                 method: 'GET',
                 inputType: 'url',
-                label: 'رابط انستقرام'
+                label: 'رابط انستقرام',
+                placeholder: 'https://www.instagram.com/reel/C7Xxyz123/',
+                example: 'https://www.instagram.com/reel/C7Xxyz123/',
+                description: 'تحميل فيديوهات، صور، ريلز، وقصص من انستقرام بأعلى جودة. يدعم الألبومات والكاروسيل.',
+                category: 'downloader',
+                status: 'active'
             },
             youtube: {
                 id: 'youtube',
-                name: 'YouTube',
+                name: 'YouTube Downloader',
                 icon: 'fa-brands fa-youtube',
                 endpoint: '/api/youtube',
-                placeholder: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-                example: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-                status: 'active',
                 method: 'GET',
                 inputType: 'url',
-                label: 'رابط يوتيوب'
+                label: 'رابط يوتيوب',
+                placeholder: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                example: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                description: 'تحميل فيديوهات يوتيوب بجودات متعددة حتى 4K. دعم الفيديوهات الطويلة والشورتس.',
+                category: 'downloader',
+                status: 'active'
             },
             'ai-image': {
                 id: 'ai-image',
-                name: 'AI Image Editor',
+                name: 'AI Image Editor (Nanobanana)',
                 icon: 'fa-solid fa-wand-magic-sparkles',
                 endpoint: '/api/ai-image',
-                placeholder: 'ادخل وصف التعديل (مثال: اجعلها كرتونية)',
-                example: 'اجعل الصورة كرتونية',
-                status: 'active',
                 method: 'POST',
                 inputType: 'file+text',
-                label: 'وصف التعديل',
-                fileLabel: 'اختر صورة'
+                label: 'وصف التعديل + صورة',
+                placeholder: 'اجعل الصورة كرتونية',
+                example: 'اجعل الصورة كرتونية',
+                description: 'تعديل الصور بالذكاء الاصطناعي باستخدام Nanobanana. ارفع صورة وأضف وصف التعديل.',
+                category: 'ai',
+                status: 'active'
             },
             img2prompt: {
                 id: 'img2prompt',
                 name: 'Image to Prompt',
                 icon: 'fa-regular fa-image',
                 endpoint: '/api/img2prompt',
-                placeholder: 'https://example.com/image.jpg',
-                example: 'https://raw.githubusercontent.com/node-form-data/form-data/master/test/data/example.gif',
-                status: 'active',
                 method: 'GET',
                 inputType: 'url',
-                label: 'رابط الصورة'
+                label: 'رابط الصورة',
+                placeholder: 'https://example.com/image.jpg',
+                example: 'https://raw.githubusercontent.com/node-form-data/form-data/master/test/data/example.gif',
+                description: 'تحويل الصورة إلى وصف نصي مفصل باستخدام الذكاء الاصطناعي.',
+                category: 'ai',
+                status: 'active'
             },
             wallpaper: {
                 id: 'wallpaper',
                 name: 'Random Wallpaper',
                 icon: 'fa-regular fa-pen-to-square',
                 endpoint: '/api/wallpaper',
-                placeholder: '',
-                example: '',
-                status: 'active',
                 method: 'GET',
                 inputType: 'none',
-                label: 'احصل على خلفية عشوائية'
+                label: 'خلفية عشوائية',
+                placeholder: '',
+                example: '',
+                description: 'جلب خلفية عشوائية عالية الجودة وعرضها مباشرة.',
+                category: 'media',
+                status: 'active'
             },
             write: {
                 id: 'write',
                 name: 'Write on Paper',
                 icon: 'fa-regular fa-pen-to-square',
                 endpoint: '/api/write',
-                placeholder: 'اكتب النص الذي تريد كتابته على الورق',
-                example: 'Sonic Bot is here',
-                status: 'active',
                 method: 'GET',
                 inputType: 'text',
-                label: 'النص المطلوب'
+                label: 'النص المطلوب',
+                placeholder: 'اكتب النص الذي تريد كتابته على الورق',
+                example: 'Sonic Bot is here',
+                description: 'كتابة نص على ورقة بأنماط جميلة وإرجاع الصورة.',
+                category: 'tools',
+                status: 'active'
             }
         };
 
-        // ═══════════════════════════════════════════════════════════════
-        // 🔧 المتغيرات
-        // ═══════════════════════════════════════════════════════════════
-        let currentApi = 'instagram';
-        let selectedFile = null;
+        // ──────────────────────────────────────────────────────────────
+        //  🔧 STATE
+        // ──────────────────────────────────────────────────────────────
+        let currentCategory = 'all';
+        let searchQuery = '';
+        let activeApiId = null; // للتحكم في الـ accordion المفتوح
+        let selectedFiles = {}; // تخزين الملفات لكل API
 
-        // ═══════════════════════════════════════════════════════════════
-        // 🔧 DOM Elements
-        // ═══════════════════════════════════════════════════════════════
-        const inputGroup = document.getElementById('inputGroup');
-        const exampleLink = document.getElementById('exampleLink');
-        const apiNameLabel = document.getElementById('apiNameLabel');
-        const inputLabel = document.getElementById('inputLabel');
-        const inputIcon = document.getElementById('inputIcon');
-        const resultSection = document.getElementById('resultSection');
-        const previewCode = document.getElementById('previewCode');
-        const curlCode = document.getElementById('curlCode');
-        const jsCode = document.getElementById('jsCode');
-        const responseTime = document.getElementById('responseTime');
-        const resultImage = document.getElementById('resultImage');
-        const resultImageDownload = document.getElementById('resultImageDownload');
-        const imageResultCard = document.getElementById('imageResultCard');
-
-        // ═══════════════════════════════════════════════════════════════
-        // 🏷️ تبديل الـ API
-        // ═══════════════════════════════════════════════════════════════
-        document.querySelectorAll('.api-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.api-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                currentApi = tab.dataset.api;
-                updateApiUI();
-            });
-        });
-
-        function updateApiUI() {
-            const api = apis[currentApi];
-            if (!api) return;
-
-            apiNameLabel.textContent = api.name;
-            inputLabel.textContent = api.label || 'رابط';
-            inputIcon.className = api.icon;
-
-            // بناء واجهة الإدخال حسب النوع
-            let inputHTML = '';
-            if (api.inputType === 'none') {
-                // زر فقط
-                inputHTML = `<button class="btn" id="actionBtn"><span class="btn-text"><i class="fa-solid fa-play"></i> تنفيذ</span><span class="spinner"></span></button>`;
-            } else if (api.inputType === 'file+text') {
-                // ملف + نص
-                inputHTML = `
-                    <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
-                        <div class="file-upload-wrapper">
-                            <input type="file" id="fileInput" accept="image/*">
-                            <label class="file-upload-label" for="fileInput">
-                                <i class="fa-regular fa-cloud-arrow-up"></i> اختر صورة <span class="file-name" id="fileName">(لم يتم الاختيار)</span>
-                            </label>
-                        </div>
-                        <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                            <input type="text" id="textInput" placeholder="${api.placeholder}" style="flex:1; min-width:200px;">
-                            <button class="btn" id="actionBtn"><span class="btn-text"><i class="fa-solid fa-play"></i> تنفيذ</span><span class="spinner"></span></button>
-                        </div>
-                    </div>
-                `;
-            } else if (api.inputType === 'url' || api.inputType === 'text') {
-                // نص عادي أو رابط
-                inputHTML = `
-                    <input type="text" id="textInput" placeholder="${api.placeholder}" style="flex:1; min-width:200px;">
-                    <button class="btn" id="actionBtn"><span class="btn-text"><i class="fa-solid fa-play"></i> تنفيذ</span><span class="spinner"></span></button>
-                `;
-            }
-
-            inputGroup.innerHTML = inputHTML;
-
-            // تعيين المثال
-            if (api.example) {
-                exampleLink.textContent = api.example;
-                exampleLink.style.display = 'inline';
-            } else {
-                exampleLink.style.display = 'none';
-            }
-
-            // إخفاء النتائج السابقة
-            resultSection.classList.remove('active');
-            previewCode.innerHTML = `<span class="comment">// انتظر تنفيذ الطلب...</span>`;
-            curlCode.innerHTML = `<span class="comment"># انتظر تنفيذ الطلب...</span>`;
-            jsCode.innerHTML = `<span class="comment">// انتظر تنفيذ الطلب...</span>`;
-            imageResultCard.style.display = 'none';
-            resultImage.src = '';
-
-            // ربط الأحداث
-            const actionBtn = document.getElementById('actionBtn');
-            if (actionBtn) {
-                actionBtn.addEventListener('click', executeApi);
-            }
-
-            const textInput = document.getElementById('textInput');
-            if (textInput) {
-                textInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') executeApi();
-                });
-            }
-
-            const fileInput = document.getElementById('fileInput');
-            if (fileInput) {
-                fileInput.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        selectedFile = file;
-                        document.getElementById('fileName').textContent = file.name;
-                    }
-                });
-            }
-
-            // حدث المثال
-            exampleLink.onclick = () => {
-                const api = apis[currentApi];
-                if (api.status === 'soon') {
-                    showToast('warning', '⏳ قريباً', `${api.name} API قيد التطوير`);
-                    return;
-                }
-                if (api.inputType === 'url' || api.inputType === 'text') {
-                    const input = document.getElementById('textInput');
-                    if (input) input.value = api.example;
-                    executeApi();
-                } else if (api.inputType === 'none') {
-                    executeApi();
-                } else if (api.inputType === 'file+text') {
-                    const input = document.getElementById('textInput');
-                    if (input) input.value = api.example;
-                    // لا نستطيع تعيين ملف تلقائياً، نطلب من المستخدم رفعه
-                    showToast('info', '📂', 'يرجى اختيار صورة ثم تنفيذ الطلب');
-                }
-            };
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // 🚀 تنفيذ الـ API
-        // ═══════════════════════════════════════════════════════════════
-        async function executeApi() {
-            const api = apis[currentApi];
-            if (!api) return;
-
-            if (api.status === 'soon') {
-                showToast('warning', '⏳ قريباً', `${api.name} API قيد التطوير`);
-                return;
-            }
-
-            const actionBtn = document.getElementById('actionBtn');
-            if (!actionBtn) return;
-
-            // تحضير البيانات
-            let inputValue = '';
-            let file = null;
-
-            if (api.inputType === 'url' || api.inputType === 'text') {
-                const input = document.getElementById('textInput');
-                if (!input) return;
-                inputValue = input.value.trim();
-                if (!inputValue) {
-                    showToast('error', '❌ خطأ', `يرجى إدخال ${api.label}`);
-                    return;
-                }
-            } else if (api.inputType === 'file+text') {
-                const input = document.getElementById('textInput');
-                if (!input) return;
-                inputValue = input.value.trim();
-                if (!inputValue) {
-                    showToast('error', '❌ خطأ', 'يرجى إدخال وصف التعديل');
-                    return;
-                }
-                if (!selectedFile) {
-                    showToast('error', '❌ خطأ', 'يرجى اختيار صورة');
-                    return;
-                }
-                file = selectedFile;
-            } else if (api.inputType === 'none') {
-                // لا نحتاج إدخال
-            }
-
-            // إظهار حالة التحميل
-            actionBtn.classList.add('loading');
-            actionBtn.disabled = true;
-            resultSection.classList.remove('active');
-            previewCode.textContent = '⏳ جاري التحميل...';
-            curlCode.textContent = '⏳ جاري التحميل...';
-            jsCode.textContent = '⏳ جاري التحميل...';
-            imageResultCard.style.display = 'none';
-
-            try {
-                let url = `${api.endpoint}`;
-                let options = {
-                    method: api.method,
-                    headers: {}
-                };
-
-                // بناء الطلب حسب النوع
-                if (api.id === 'wallpaper' || api.id === 'write') {
-                    // هذه الـ APIs تعيد صورة مباشرة
-                    if (api.id === 'write') {
-                        url += `?text=${encodeURIComponent(inputValue)}`;
-                    }
-                    // نستخدم fetch للحصول على الصورة
-                    const startTime = performance.now();
-                    const response = await fetch(url);
-                    if (!response.ok) {
-                        let errMsg = 'حدث خطأ';
-                        try {
-                            const errData = await response.json();
-                            errMsg = errData.error || errData.message || errMsg;
-                        } catch(e) {}
-                        throw new Error(errMsg);
-                    }
-                    const blob = await response.blob();
-                    const imageUrl = URL.createObjectURL(blob);
-                    const endTime = performance.now();
-                    const time = ((endTime - startTime)/1000).toFixed(2);
-                    responseTime.textContent = `⏱️ ${time}s`;
-
-                    // عرض الصورة
-                    resultImage.src = imageUrl;
-                    resultImageDownload.href = imageUrl;
-                    resultImageDownload.download = `${api.id}_${Date.now()}.png`;
-                    imageResultCard.style.display = 'block';
-                    resultSection.classList.add('active');
-                    previewCode.textContent = `// تم تحميل الصورة بنجاح (${time}s)`;
-                    curlCode.textContent = `curl -X GET "${window.location.origin}${url}" --output image.png`;
-                    jsCode.textContent = `// تحميل الصورة
-fetch('${window.location.origin}${url}')
-  .then(res => res.blob())
-  .then(blob => {
-    const img = URL.createObjectURL(blob);
-    document.getElementById('preview').src = img;
-  });`;
-                    showToast('success', '✅ تم بنجاح', 'تم تحميل الصورة');
-                    return;
-                }
-
-                // باقي الـ APIs ترجع JSON
-                if (api.inputType === 'file+text') {
-                    // رفع ملف مع النص
-                    const formData = new FormData();
-                    formData.append('prompt', inputValue);
-                    formData.append('file', file);
-                    options.body = formData;
-                    // لا نضع Content-Type لأن FormData يحددها تلقائياً
-                } else if (api.inputType === 'url' || api.inputType === 'text') {
-                    // إضافة المعامل في الرابط
-                    if (api.id === 'instagram' || api.id === 'youtube' || api.id === 'img2prompt') {
-                        url += `?url=${encodeURIComponent(inputValue)}`;
-                    }
-                    // لـ ai-image (GET) نضيف imageUrl و prompt
-                    if (api.id === 'ai-image' && api.inputType === 'url') {
-                        // ولكننا نستخدم POST مع ملف، لذا لا ندخل هنا
-                    }
-                }
-
-                const startTime = performance.now();
-                const response = await fetch(url, options);
-                const endTime = performance.now();
-                const time = ((endTime - startTime)/1000).toFixed(2);
-                responseTime.textContent = `⏱️ ${time}s`;
-
-                if (!response.ok) {
-                    let errMsg = 'حدث خطأ';
-                    try {
-                        const errData = await response.json();
-                        errMsg = errData.error || errData.message || errMsg;
-                    } catch(e) {}
-                    throw new Error(errMsg);
-                }
-
-                const data = await response.json();
-
-                // عرض النتائج
-                const jsonStr = JSON.stringify(data, null, 2);
-                previewCode.innerHTML = syntaxHighlight(jsonStr);
-
-                const curlCmd = `curl -X ${api.method} "${window.location.origin}${url}"`;
-                curlCode.innerHTML = `<span class="comment"># ${api.name} API</span>\n${curlCmd}`;
-
-                const jsExample = `// ${api.name} API
-fetch('${window.location.origin}${url}')
-  .then(res => res.json())
-  .then(data => console.log(data));`;
-                jsCode.innerHTML = syntaxHighlight(jsExample);
-
-                resultSection.classList.add('active');
-                showToast('success', '✅ تم بنجاح', 'تم تنفيذ الطلب');
-
-            } catch (error) {
-                previewCode.textContent = `❌ خطأ: ${error.message}`;
-                curlCode.textContent = `❌ خطأ: ${error.message}`;
-                jsCode.textContent = `❌ خطأ: ${error.message}`;
-                resultSection.classList.add('active');
-                showToast('error', '❌ فشل', error.message);
-            } finally {
-                actionBtn.classList.remove('loading');
-                actionBtn.disabled = false;
-            }
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // 🎨 Syntax Highlight
-        // ═══════════════════════════════════════════════════════════════
-        function syntaxHighlight(text) {
-            text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return text.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
-                let cls = 'json-number';
-                if (/^"/.test(match)) {
-                    if (/:$/.test(match)) {
-                        cls = 'json-key';
-                    } else {
-                        cls = 'json-string';
-                    }
-                } else if (/true|false/.test(match)) {
-                    cls = 'json-boolean';
-                } else if (/null/.test(match)) {
-                    cls = 'json-null';
-                }
-                return `<span class="${cls}">${match}</span>`;
-            });
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // 📋 دالة النسخ
-        // ═══════════════════════════════════════════════════════════════
-        function copyText(text, successMsg = 'تم النسخ') {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('success', '✅ تم النسخ', successMsg);
-            }).catch(() => {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showToast('success', '✅ تم النسخ', successMsg);
-            });
-        }
-
-        function copyCode(id) {
-            const el = document.getElementById(id);
-            const text = el.textContent.trim();
-            copyText(text);
-        }
-
-        // ═══════════════════════════════════════════════════════════════
-        // 🍞 Toast System
-        // ═══════════════════════════════════════════════════════════════
+        // ──────────────────────────────────────────────────────────────
+        //  🍞 TOAST SYSTEM
+        // ──────────────────────────────────────────────────────────────
         function showToast(type, title, message) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -1029,16 +1401,495 @@ fetch('${window.location.origin}${url}')
                 <div class="toast-message">${message}</div>
             `;
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3800);
         }
 
-        // ═══════════════════════════════════════════════════════════════
-        // 🚀 بدء التشغيل
-        // ═══════════════════════════════════════════════════════════════
-        updateApiUI();
-        console.log('🚀 Sonic API Center ready!');
-        console.log('📚 APIs متاحة:', Object.keys(apis).filter(k => apis[k].status === 'active').length);
-        console.log('💡 لإضافة APIs جديدة، أضفها في مصفوفة apis');
+        // ──────────────────────────────────────────────────────────────
+        //  📋 COPY HELPERS
+        // ──────────────────────────────────────────────────────────────
+        function copyText(text, successMsg = 'تم النسخ ✅') {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('success', '📋 نسخ', successMsg);
+                }).catch(() => fallbackCopy(text, successMsg));
+            } else {
+                fallbackCopy(text, successMsg);
+            }
+        }
+
+        function fallbackCopy(text, successMsg) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast('success', '📋 نسخ', successMsg);
+            } catch (e) {
+                showToast('error', '❌ خطأ', 'فشل النسخ');
+            }
+            document.body.removeChild(ta);
+        }
+
+        function copyResponse(apiId) {
+            const el = document.getElementById(`resp-body-${apiId}`);
+            if (!el) return;
+            const text = el.textContent.trim();
+            copyText(text, 'تم نسخ الـ Response');
+        }
+
+        function copyUrl(apiId) {
+            const el = document.getElementById(`url-text-${apiId}`);
+            if (!el) return;
+            copyText(el.textContent, 'تم نسخ الرابط');
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  🎨 SYNTAX HIGHLIGHT (JSON)
+        // ──────────────────────────────────────────────────────────────
+        function syntaxHighlight(json) {
+            if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(
+                /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+                function(match) {
+                    let cls = 'json-number';
+                    if (/^"/.test(match)) {
+                        cls = /:$/.test(match) ? 'json-key' : 'json-string';
+                    } else if (/true|false/.test(match)) {
+                        cls = 'json-boolean';
+                    } else if (/null/.test(match)) {
+                        cls = 'json-null';
+                    }
+                    return `<span class="${cls}">${match}</span>`;
+                }
+            );
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  🏷️ CATEGORY PILLS
+        // ──────────────────────────────────────────────────────────────
+        function renderCategoryPills() {
+            const container = document.getElementById('categoryPills');
+            const categories = {};
+            Object.values(apisConfig).forEach(api => {
+                if (api.status === 'active') {
+                    categories[api.category] = (categories[api.category] || 0) + 1;
+                }
+            });
+            let html =
+                `<button class="pill ${currentCategory === 'all' ? 'active' : ''}" data-cat="all">📡 الكل <span class="count">(${Object.values(apisConfig).filter(a => a.status === 'active').length})</span></button>`;
+            const catLabels = {
+                downloader: '📥 تحميل',
+                ai: '🤖 AI',
+                media: '🖼️ وسائط',
+                tools: '🔧 أدوات'
+            };
+            Object.keys(categories).forEach(cat => {
+                const label = catLabels[cat] || cat;
+                const active = currentCategory === cat ? 'active' : '';
+                html +=
+                    `<button class="pill ${active}" data-cat="${cat}">${label} <span class="count">(${categories[cat]})</span></button>`;
+            });
+            container.innerHTML = html;
+
+            container.querySelectorAll('.pill').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentCategory = btn.dataset.cat;
+                    renderCategoryPills();
+                    renderAccordion();
+                });
+            });
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  🧩 RENDER ACCORDION
+        // ──────────────────────────────────────────────────────────────
+        function renderAccordion() {
+            const container = document.getElementById('accordionContainer');
+            const search = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            let filtered = Object.values(apisConfig).filter(api => {
+                if (api.status !== 'active') return false;
+                const catMatch = currentCategory === 'all' || api.category === currentCategory;
+                const searchMatch = !search ||
+                    api.name.toLowerCase().includes(search) ||
+                    api.description.toLowerCase().includes(search) ||
+                    api.id.toLowerCase().includes(search);
+                return catMatch && searchMatch;
+            });
+
+            document.getElementById('endpointCount').textContent = `${filtered.length} متاحة`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+                        <i class="fa-regular fa-search" style="font-size:2rem;opacity:0.3;"></i>
+                        <p style="margin-top:10px;">لم يتم العثور على endpoints تطابق بحثك</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((api, idx) => {
+                const isOpen = activeApiId === api.id;
+                const methodClass = api.method.toLowerCase();
+                const statusLabel = api.status === 'active' ? '🟢 نشط' : '🔴 غير نشط';
+
+                html += `
+                    <div class="accordion-item ${isOpen ? 'open' : ''}" data-api="${api.id}">
+                        <button class="accordion-header" onclick="toggleAccordion('${api.id}')" aria-expanded="${isOpen}">
+                            <span class="method-badge ${methodClass}">${api.method}</span>
+                            <span class="api-name"><i class="${api.icon}" style="margin-left:6px;color:var(--accent-glow);"></i>${api.name}</span>
+                            <span class="api-status">${statusLabel}</span>
+                            <span class="arrow"><i class="fa-regular fa-chevron-down"></i></span>
+                        </button>
+                        <div class="accordion-body">
+                            <div class="api-desc">${api.description}</div>
+                            <div class="api-form" id="form-${api.id}">
+                                ${buildFormFields(api)}
+                                <div class="req-url-box">
+                                    <span class="url-label">🔗 REQUEST URL</span>
+                                    <span class="url-text" id="url-text-${api.id}">${window.location.origin}${api.endpoint}?url=...</span>
+                                    <button class="copy-url-btn" onclick="copyUrl('${api.id}')" aria-label="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                                </div>
+                                <button class="execute-btn" id="exec-${api.id}" onclick="executeApi('${api.id}')">
+                                    <span class="spinner"></span>
+                                    <span class="btn-text"><i class="fa-regular fa-bolt"></i> ⚡ EXECUTE</span>
+                                </button>
+                                <div class="response-box" id="resp-${api.id}" style="display:none;">
+                                    <div class="resp-header">
+                                        <span class="resp-status" id="resp-status-${api.id}">
+                                            <span class="dot green"></span> 200 OK
+                                        </span>
+                                        <button class="resp-copy" onclick="copyResponse('${api.id}')"><i class="fa-regular fa-copy"></i> نسخ</button>
+                                    </div>
+                                    <div class="resp-body" id="resp-body-${api.id}">// النتائج ستظهر هنا</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // بعد التصيير، نربط أحداث رفع الملفات
+            document.querySelectorAll('.file-input-hidden').forEach(input => {
+                const apiId = input.dataset.api;
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        selectedFiles[apiId] = file;
+                        const display = document.getElementById(`file-name-${apiId}`);
+                        if (display) display.textContent = file.name;
+                    }
+                });
+            });
+
+            // تحديث URL للـ APIs التي تحتاجها
+            Object.keys(apisConfig).forEach(id => {
+                updateUrlDisplay(id);
+            });
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  🧩 BUILD FORM FIELDS
+        // ──────────────────────────────────────────────────────────────
+        function buildFormFields(api) {
+            let html = '';
+            if (api.inputType === 'url' || api.inputType === 'text') {
+                html += `
+                    <div class="form-row">
+                        <label>${api.label}</label>
+                        <input type="text" id="input-${api.id}" placeholder="${api.placeholder}" value="${api.example || ''}" />
+                    </div>
+                `;
+            } else if (api.inputType === 'file+text') {
+                html += `
+                    <div class="form-row">
+                        <label>${api.label}</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:10px;flex:1;">
+                            <input type="text" id="input-${api.id}" placeholder="${api.placeholder}" value="${api.example || ''}" style="flex:1;min-width:140px;" />
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <label class="file-upload-btn">
+                                    <i class="fa-regular fa-cloud-arrow-up"></i> اختر صورة
+                                    <input type="file" class="file-input-hidden" data-api="${api.id}" accept="image/*" />
+                                </label>
+                                <span class="file-name-display" id="file-name-${api.id}">(لم يتم الاختيار)</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (api.inputType === 'none') {
+                // لا شيء
+            }
+            return html;
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  🔄 UPDATE URL DISPLAY
+        // ──────────────────────────────────────────────────────────────
+        function updateUrlDisplay(apiId) {
+            const api = apisConfig[apiId];
+            if (!api) return;
+            const el = document.getElementById(`url-text-${apiId}`);
+            if (!el) return;
+            const base = window.location.origin + api.endpoint;
+            let url = base;
+
+            if (api.inputType === 'url' || api.inputType === 'text') {
+                const input = document.getElementById(`input-${apiId}`);
+                const val = input ? input.value.trim() : '';
+                if (val) {
+                    url += `?url=${encodeURIComponent(val)}`;
+                } else {
+                    url += `?url=...`;
+                }
+            } else if (api.inputType === 'file+text') {
+                const input = document.getElementById(`input-${apiId}`);
+                const val = input ? input.value.trim() : '';
+                if (val) {
+                    url += `?prompt=${encodeURIComponent(val)}`;
+                } else {
+                    url += `?prompt=...`;
+                }
+            }
+            el.textContent = url;
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  🔽 TOGGLE ACCORDION
+        // ──────────────────────────────────────────────────────────────
+        function toggleAccordion(apiId) {
+            if (activeApiId === apiId) {
+                activeApiId = null;
+            } else {
+                activeApiId = apiId;
+            }
+            renderAccordion();
+            // إعادة تعيين الملفات المختارة
+            Object.keys(selectedFiles).forEach(key => {
+                const display = document.getElementById(`file-name-${key}`);
+                if (display && selectedFiles[key]) {
+                    display.textContent = selectedFiles[key].name;
+                }
+            });
+            // إعادة ربط الأحداث
+            document.querySelectorAll('.file-input-hidden').forEach(inp => {
+                const id = inp.dataset.api;
+                inp.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        selectedFiles[id] = file;
+                        const d = document.getElementById(`file-name-${id}`);
+                        if (d) d.textContent = file.name;
+                    }
+                });
+            });
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  🚀 EXECUTE API
+        // ──────────────────────────────────────────────────────────────
+        async function executeApi(apiId) {
+            const api = apisConfig[apiId];
+            if (!api) return;
+
+            const btn = document.getElementById(`exec-${apiId}`);
+            const respBox = document.getElementById(`resp-${apiId}`);
+            const respBody = document.getElementById(`resp-body-${apiId}`);
+            const respStatus = document.getElementById(`resp-status-${apiId}`);
+
+            // جمع البيانات
+            let inputValue = '';
+            const inputEl = document.getElementById(`input-${apiId}`);
+            if (inputEl) inputValue = inputEl.value.trim();
+
+            let file = null;
+            if (api.inputType === 'file+text') {
+                file = selectedFiles[apiId] || null;
+                if (!inputValue) {
+                    showToast('error', '❌ خطأ', 'يرجى إدخال وصف التعديل');
+                    return;
+                }
+                if (!file) {
+                    showToast('error', '❌ خطأ', 'يرجى اختيار صورة');
+                    return;
+                }
+            }
+
+            if ((api.inputType === 'url' || api.inputType === 'text') && !inputValue) {
+                showToast('error', '❌ خطأ', `يرجى إدخال ${api.label}`);
+                return;
+            }
+
+            // إظهار حالة التحميل
+            btn.classList.add('loading');
+            btn.disabled = true;
+            respBox.style.display = 'none';
+
+            try {
+                let url = `${window.location.origin}${api.endpoint}`;
+                let options = {
+                    method: api.method,
+                    headers: {}
+                };
+
+                // بناء الطلب حسب النوع
+                if (api.inputType === 'file+text') {
+                    const formData = new FormData();
+                    formData.append('prompt', inputValue);
+                    formData.append('file', file);
+                    options.body = formData;
+                    // لا نضع Content-Type لأن FormData يحددها
+                } else if (api.inputType === 'url' || api.inputType === 'text') {
+                    if (api.id === 'write') {
+                        url += `?text=${encodeURIComponent(inputValue)}`;
+                    } else {
+                        url += `?url=${encodeURIComponent(inputValue)}`;
+                    }
+                }
+                // wallpaper لا يحتاج أي شيء
+
+                const startTime = performance.now();
+                let response;
+
+                // معالجة خاصة لـ wallpaper و write لأنهما يعيدان صورة
+                if (api.id === 'wallpaper' || api.id === 'write') {
+                    response = await fetch(url);
+                    if (!response.ok) {
+                        let errMsg = 'حدث خطأ';
+                        try {
+                            const errData = await response.json();
+                            errMsg = errData.error || errData.message || errMsg;
+                        } catch (e) {}
+                        throw new Error(errMsg);
+                    }
+                    const blob = await response.blob();
+                    const imageUrl = URL.createObjectURL(blob);
+                    const endTime = performance.now();
+                    const time = ((endTime - startTime) / 1000).toFixed(2);
+
+                    // عرض الصورة في response
+                    respBody.innerHTML = `
+                        <div style="text-align:center;padding:10px;">
+                            <img src="${imageUrl}" alt="Result" style="max-width:100%;max-height:350px;border-radius:8px;border:1px solid var(--border-color);" />
+                            <br>
+                            <a href="${imageUrl}" download="${api.id}_${Date.now()}.png" style="display:inline-block;margin-top:12px;padding:8px 24px;background:var(--gradient-main);color:#fff;border-radius:var(--radius-full);font-weight:700;text-decoration:none;">⬇️ تحميل الصورة</a>
+                        </div>
+                    `;
+                    respStatus.innerHTML = `<span class="dot green"></span> 200 OK — ${time}s`;
+                    respBox.style.display = 'block';
+                    showToast('success', '✅ تم بنجاح', 'تم تحميل الصورة');
+                    return;
+                }
+
+                // باقي الـ APIs (JSON)
+                response = await fetch(url, options);
+                const endTime = performance.now();
+                const time = ((endTime - startTime) / 1000).toFixed(2);
+
+                if (!response.ok) {
+                    let errMsg = 'حدث خطأ';
+                    try {
+                        const errData = await response.json();
+                        errMsg = errData.error || errData.message || errMsg;
+                    } catch (e) {}
+                    throw new Error(errMsg);
+                }
+
+                const data = await response.json();
+                const jsonStr = JSON.stringify(data, null, 2);
+                respBody.innerHTML = syntaxHighlight(jsonStr);
+                respStatus.innerHTML = `<span class="dot green"></span> 200 OK — ${time}s`;
+                respBox.style.display = 'block';
+                showToast('success', '✅ تم بنجاح', 'تم تنفيذ الطلب');
+
+            } catch (error) {
+                respBody.innerHTML =
+                    `<span class="error-text">❌ ${error.message || 'حدث خطأ غير متوقع'}</span>`;
+                respStatus.innerHTML = `<span class="dot red"></span> 500 Error`;
+                respBox.style.display = 'block';
+                showToast('error', '❌ فشل', error.message || 'خطأ في التنفيذ');
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+                // تحديث الـ URL بعد التنفيذ
+                updateUrlDisplay(apiId);
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        //  🔍 SEARCH HANDLER
+        // ──────────────────────────────────────────────────────────────
+        document.getElementById('searchInput').addEventListener('input', function() {
+            searchQuery = this.value.trim().toLowerCase();
+            renderAccordion();
+        });
+
+        // ──────────────────────────────────────────────────────────────
+        //  🌙 THEME TOGGLE
+        // ──────────────────────────────────────────────────────────────
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        let isLight = localStorage.getItem('sonic-theme') === 'light';
+
+        function applyTheme() {
+            if (isLight) {
+                document.body.classList.add('light-mode');
+                themeIcon.className = 'fa-regular fa-sun';
+            } else {
+                document.body.classList.remove('light-mode');
+                themeIcon.className = 'fa-regular fa-moon';
+            }
+            localStorage.setItem('sonic-theme', isLight ? 'light' : 'dark');
+        }
+        applyTheme();
+
+        themeToggle.addEventListener('click', () => {
+            isLight = !isLight;
+            applyTheme();
+            showToast('info', '🎨 مظهر', isLight ? 'الوضع الفاتح' : 'الوضع الداكن');
+        });
+
+        // ──────────────────────────────────────────────────────────────
+        //  📜 NAVBAR SCROLL EFFECT
+        // ──────────────────────────────────────────────────────────────
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 30) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // ──────────────────────────────────────────────────────────────
+        //  🚀 SPLASH SCREEN — HIDE AFTER LOAD
+        // ──────────────────────────────────────────────────────────────
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splash').classList.add('hidden');
+            }, 2000);
+        });
+
+        // ──────────────────────────────────────────────────────────────
+        //  ⚡ INIT
+        // ──────────────────────────────────────────────────────────────
+        renderCategoryPills();
+        renderAccordion();
+
+        console.log('🚀 SONIC API Center — Cyberpunk Edition');
+        console.log(`📚 ${Object.values(apisConfig).filter(a => a.status === 'active').length} APIs متاحة`);
+        console.log('💡 Powered by SONIC DEV 🇲🇦');
     </script>
 </body>
 </html>
