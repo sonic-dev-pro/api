@@ -2,6 +2,18 @@
   "version": 2,
   "builds": [
     {
+      "src": "api/suno.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/imagine.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/deepseek.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "api/instagram.js",
       "use": "@vercel/node"
     },
@@ -50,15 +62,23 @@
       "use": "@vercel/node"
     },
     {
-      "src": "api/deepseek.js",
-      "use": "@vercel/node"
-    },
-    {
       "src": "index.html",
       "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/api/suno",
+      "dest": "/api/suno.js"
+    },
+    {
+      "src": "/api/imagine",
+      "dest": "/api/imagine.js"
+    },
+    {
+      "src": "/api/deepseek",
+      "dest": "/api/deepseek.js"
+    },
     {
       "src": "/api/instagram",
       "dest": "/api/instagram.js"
@@ -106,10 +126,6 @@
     {
       "src": "/api/proxy",
       "dest": "/api/proxy.js"
-    },
-    {
-      "src": "/api/deepseek",
-      "dest": "/api/deepseek.js"
     },
     {
       "src": "/",
