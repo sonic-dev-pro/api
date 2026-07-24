@@ -50,6 +50,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "api/deepseek.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "index.html",
       "use": "@vercel/static"
     }
@@ -102,6 +106,10 @@
     {
       "src": "/api/proxy",
       "dest": "/api/proxy.js"
+    },
+    {
+      "src": "/api/deepseek",
+      "dest": "/api/deepseek.js"
     },
     {
       "src": "/",
