@@ -11,12 +11,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// قائمة بكل ملفات الـ APIs الموجودة داخل مجلد src
+// قائمة بجميع ملفات الـ APIs الموجودة في مجلد src
 const apiModules = [
     'deepseek.js',
     'imagine.js',
     'suno.js',
     'islam-ai.js',
+    'morph.js',
     'stalkchannel.js',
     'instagram.js',
     'youtube.js',
