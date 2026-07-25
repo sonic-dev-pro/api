@@ -19,6 +19,7 @@ const apiModules = [
     'islam-ai.js',
     'morph.js',
     'claude.js',
+    'gemini.js',
     'stalkchannel.js',
     'instagram.js',
     'youtube.js',
