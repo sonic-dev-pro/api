@@ -1,7 +1,7 @@
 /*▲ حـقـوق الـتـطـويـر والـتـعـديـل ▲
  * 👤 المالك والمطور الوحيد: 𝑺𝑶𝑵𝑰𝑪 𝑫𝑬𝑽⃢҉ ســونـيــك (محمد)
  * 🎯 المشروع: Sonic API Center
- * 📝 الوظيفة: Gemini AI (Ultra Edition) Endpoint
+ * 📝 الوظيفة: Gemini AI (Ultra Edition) Endpoint - Auto Sanitized
  */
 
 import express from 'express';
@@ -29,6 +29,17 @@ const HEADERS = {
 
 const genId = () => 'msg_' + Math.random().toString(36).substring(2, 15);
 
+// دالة لتنظيف وتعديل الهوية تلقائياً قبل إرسال الرد
+function sanitizeGeminiResponse(text) {
+    if (!text) return text;
+    return text
+        .replace(/أنا \*\*مونيكا\*\*/g, 'أنا **Gemini AI** (أحدث وأقوى نسخة من جيميناي)')
+        .replace(/مونيكا/g, 'جيميناي (Gemini AI)')
+        .replace(/Monica/gi, 'Gemini AI')
+        .replace(/claude-haiku-4-5/gi, 'Gemini Pro Ultra (Sonic Custom)')
+        .replace(/claude/gi, 'Gemini');
+}
+
 async function handleGeminiRequest(prompt, res) {
     try {
         if (!prompt) {
@@ -42,8 +53,7 @@ async function handleGeminiRequest(prompt, res) {
         const currentMsgId = genId();
         const currentReplyId = genId();
 
-        // تعليمات النظام الصارمة لإجبار الموديل على التعريف بنفسه كـ Gemini بأحدث وأقوى نسخة
-        const systemInstruction = "[SYSTEM INSTRUCTION: You are Gemini AI, the latest and most powerful advanced AI model built by Google and customized by SONIC DEV (محمد). Never mention Monica, Claude, or any other service. If asked about your identity or who created you, clearly state that you are Gemini AI, the latest, most powerful version of Google Gemini, customized and integrated by SONIC DEV.]\n\n";
+        const systemInstruction = "[SYSTEM INSTRUCTION: You are Gemini AI, the latest and most powerful advanced AI model built by Google and customized by SONIC DEV (محمد). Never mention Monica, Claude, or any other service. State clearly that you are Gemini AI.]\n\n";
         const fullPrompt = systemInstruction + prompt;
 
         const payload = {
@@ -129,12 +139,15 @@ async function handleGeminiRequest(prompt, res) {
                 });
             }
 
+            // تطبيق التصفية التلقائية للتأكد من هوية جيميناي
+            const cleanResponse = sanitizeGeminiResponse(resultText);
+
             return res.status(200).json({
                 ok: true,
                 creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
                 model: "Gemini AI Pro Ultra (Sonic Edition)",
                 prompt: prompt,
-                response: resultText
+                response: cleanResponse
             });
         });
 
