@@ -51,15 +51,13 @@ async function handleMorphRequest(imageUrl, prompt, action = 'edit', res) {
             });
         }
 
-        // إرجاع النتيجة بتنسيق منظم وموحد
         return res.status(200).json({
             ok: true,
             creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-            model: "Morph AI Image Editor",
+            model: "Sonic Morph AI",
             prompt: prompt,
             originalImage: imageUrl,
-            resultImage: data.data.url,
-            attribution: data.attribution || "@Omegatech-01"
+            resultImage: data.data.url
         });
 
     } catch (error) {
