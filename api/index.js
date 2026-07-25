@@ -11,11 +11,12 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// قائمة بجميع ملفات الـ APIs الموجودة في مجلد src
+// قائمة بكل ملفات الـ APIs الموجودة داخل مجلد src
 const apiModules = [
     'deepseek.js',
     'imagine.js',
     'suno.js',
+    'islam-ai.js',
     'stalkchannel.js',
     'instagram.js',
     'youtube.js',
@@ -45,7 +46,7 @@ async function loadRoutes() {
     }
 }
 
-// تنفيذ تحميل الـ Routes
+// تنفيذ تحميل الـ Routes عند بداية السيرفر
 await loadRoutes();
 
 // ─── الصفحة الرئيسية للتحقق من حالة السيرفر ───────────────────────────────
@@ -53,7 +54,7 @@ app.get('/api', (req, res) => {
     res.json({
         status: true,
         creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-        message: "Sonic API Center Server is Online & Running System Protected!",
+        message: "Sonic API Center Server is Online & System Protected!",
         timestamp: new Date().toISOString()
     });
 });
