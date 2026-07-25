@@ -22,7 +22,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// استخدام الـ Routers
+
 app.use(deepseekRouter);
 app.use(imagineRouter);
 app.use(sunoRouter);
