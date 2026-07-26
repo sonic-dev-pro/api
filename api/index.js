@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// قائمة بجميع ملفات الـ APIs الموجودة داخل مجلد src
+// قائمة بجميع ملفات الـ APIs الموجودة داخل مجلد src (تمت إضافة claude2.js)
 const apiModules = [
     'deepseek.js',
     'imagine.js',
@@ -19,6 +19,7 @@ const apiModules = [
     'islam-ai.js',
     'morph.js',
     'claude.js',
+    'claude2.js',
     'gemini.js',
     'stalkchannel.js',
     'instagram.js',
