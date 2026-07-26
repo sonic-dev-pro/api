@@ -5,15 +5,13 @@
  */
 
 import express from 'express';
-import cors from 'cors';
 
 const app = express();
 
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// قائمة الـ Modules
+// قائمة بجميع ملفات الـ APIs الموجودة داخل مجلد src (تمت إضافة claude2.js و simsimi.js)
 const apiModules = [
     'deepseek.js',
     'imagine.js',
@@ -22,7 +20,7 @@ const apiModules = [
     'morph.js',
     'claude.js',
     'claude2.js',
-    'simsimi.js',
+    'simsimi.js', // <-- تمت إضافة سمسمي هنا
     'gemini.js',
     'stalkchannel.js',
     'instagram.js',
@@ -38,38 +36,35 @@ const apiModules = [
     'proxy.js'
 ];
 
-// تحميل المسارات بطريقة آمنة لا تكسر السيرفر
-for (const file of apiModules) {
-    try {
-        // محاولة استدعاء الملف من مجلد src
-        const module = await import(`../src/${file}`).catch(() => import(`./${file}`));
-        if (module && module.default) {
-            app.use(module.default);
+// دالة التحميل الآمن لمنع خطأ 500 وإبقاء السيرفر شغالاً دائماً
+async function loadRoutes() {
+    for (const file of apiModules) {
+        try {
+            const module = await import(`../src/${file}`);
+            if (module && module.default) {
+                app.use(module.default);
+                console.log(`[Sonic API] Loaded successfully: ${file}`);
+            }
+        } catch (error) {
+            console.warn(`[Sonic API Warning] Could not load ../src/${file}:`, error.message);
         }
-    } catch (err) {
-        console.warn(`[Sonic API Warning] Failed to load ${file}:`, err.message);
     }
 }
 
-// ─── Route رئيسي للتأكد من حالة السيرفر ──────────────────────────────
-app.get('/', (req, res) => {
-    res.status(200).json({
-        status: true,
-        service: "Sonic API Center ⚡",
-        creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ (محمد) 🇲🇦",
-        message: "Sonic API Server Online & Working Perfectly!"
-    });
-});
+// تنفيذ تحميل الـ Routes عند بداية السيرفر
+await loadRoutes();
 
+// ─── الصفحة الرئيسية للتحقق من حالة السيرفر ───────────────────────────────
 app.get('/api', (req, res) => {
-    res.status(200).json({
+    res.json({
         status: true,
         creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-        message: "API Gateway is Active"
+        message: "Sonic API Center Server is Online & System Protected!",
+        timestamp: new Date().toISOString()
     });
 });
 
-// التعامل مع المسارات المفقودة 404
+// التعامل مع المسارات غير المكتشفة (404 بدلاً من 500)
 app.use((req, res) => {
     res.status(404).json({
         ok: false,
