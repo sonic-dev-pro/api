@@ -8,8 +8,9 @@ import express from 'express';
 import axios from 'axios';
 
 const router = express.Router();
-// يمكنك استبدال هذا الرابط بالـ API الداخلي الذي جلبته
-const EXTERNAL_API_URL = 'https://your-api-url.com/api/your-endpoint';
+
+// بدّل هاد الرابط بالرابط الخارجي ديالك
+const EXTERNAL_API_URL = 'https://nikai-api-main.vercel.app/api/deepseek';
 
 async function handleDeepSeek2Request(userText, res) {
     try {
@@ -23,17 +24,20 @@ async function handleDeepSeek2Request(userText, res) {
 
         const response = await axios.get(EXTERNAL_API_URL, {
             params: { text: userText.trim() },
-            timeout: 15000
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            },
+            timeout: 20000
         });
 
         const data = response.data;
-        const aiReply = data?.reply || data?.answer || data?.result || data?.text;
+        const aiReply = data?.answer || data?.reply || data?.result || data?.text;
 
         if (!data || !aiReply) {
             return res.status(502).json({
                 ok: false,
                 creator: "ˢᵒⁿⁱⁿᶜ ᴰᵉᵛ 𒉭",
-                error: "تعذر الحصول على إجابة من سيرفر الذكاء الاصطناعي."
+                error: "تعذر الحصول على إجابة من السيرفر الداخلي."
             });
         }
 
@@ -47,12 +51,16 @@ async function handleDeepSeek2Request(userText, res) {
 
     } catch (error) {
         console.error('DeepSeek2 API Error:', error.message);
+        
+        const isNotFound = error.response && error.response.status === 404;
         const isTimeout = error.code === 'ECONNABORTED';
 
-        return res.status(isTimeout ? 504 : 500).json({
+        return res.status(isNotFound ? 404 : isTimeout ? 504 : 500).json({
             ok: false,
             creator: "ˢᵒⁿⁱⁿᶜ ᴰᵉᵛ 𒉭",
-            error: isTimeout ? "انتهت مهلة الانتظار." : "حدث خطأ داخلي أثناء معالجة الطلب.",
+            error: isNotFound 
+                ? "رابط الـ API الخارجي غير موجود (404 Not Found). تأكد من صحة الرابط." 
+                : isTimeout ? "انتهت مهلة الانتظار." : "حدث خطأ داخلي أثناء معالجة الطلب.",
             details: error.message
         });
     }
