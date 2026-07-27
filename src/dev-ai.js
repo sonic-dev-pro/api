@@ -12,7 +12,9 @@ const BASE_DEEPSEEK_API = 'https://nikai-api-main.vercel.app/api/deepseek';
 
 async function handleDevAIRequest(req, res) {
     try {
-        const { text, codeContext } = req.body || {};
+        // قراءة البيانات سواء كانت مرسلة عبر POST (body) أو GET (query)
+        const text = req.body?.text || req.query?.text;
+        const codeContext = req.body?.codeContext || req.query?.codeContext;
 
         if (!text) {
             return res.status(400).json({
@@ -70,15 +72,21 @@ async function handleDevAIRequest(req, res) {
     }
 }
 
-// الـ Endpoint يستقبل POST لحمل الأكواد الكبيرة
+// ─── دعم POST لربط الواتساب والأكواد الضخمة ───
 router.post('/api/dev-ai', async (req, res) => {
+    await handleDevAIRequest(req, res);
+});
+
+// ─── دعم GET للاختبار المباشر عبر المتصفح والروابط ───
+router.get('/api/dev-ai', async (req, res) => {
     await handleDevAIRequest(req, res);
 });
 
 export const apiMetadata = {
     path: '/api/dev-ai',
     name: 'Sonic Dev AI Endpoint',
-    type: 'ai / developer'
+    type: 'ai / developer',
+    urlExample: '/api/dev-ai?text=كيف اعمل امر جديد؟'
 };
 
 export default router;
