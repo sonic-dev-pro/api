@@ -8,14 +8,14 @@ import express from 'express';
 
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// 💡 زيادة الحد الأقصى لحجم البيانات المقبولة إلى 10MB لمنع خطأ 413 Payload Too Large
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// قائمة بجميع ملفات الـ APIs الموجودة داخل مجلد src (تمت إضافة dev-ai.js)
 const apiModules = [
     'deepseek.js',
     'deepseek2.js',
-    'dev-ai.js', // <-- الـ API الجديد المخصص لمطور الهيكلة
+    'dev-ai.js',
     'imagine.js',
     'suno.js',
     'sono.js',
@@ -39,7 +39,6 @@ const apiModules = [
     'proxy.js'
 ];
 
-// دالة التحميل الآمن لمنع خطأ 500 وإبقاء السيرفر شغالاً دائماً
 async function loadRoutes() {
     for (const file of apiModules) {
         try {
@@ -54,24 +53,21 @@ async function loadRoutes() {
     }
 }
 
-// تنفيذ تحميل الـ Routes عند بداية السيرفر
 await loadRoutes();
 
-// ─── الصفحة الرئيسية للتحقق من حالة السيرفر ───────────────────────────────
 app.get('/api', (req, res) => {
     res.json({
         status: true,
-        creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
+        creator: "ˢᵒⁿⁱⁿᶜ ᴰᵉᵛ 𒉭",
         message: "Sonic API Center Server is Online & System Protected!",
         timestamp: new Date().toISOString()
     });
 });
 
-// التعامل مع المسارات غير المكتشفة (404 بدلاً من 500)
 app.use((req, res) => {
     res.status(404).json({
         ok: false,
-        creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
+        creator: "ˢᵒⁿⁱⁿᶜ ᴰᵉᵛ 𒉭",
         error: "Endpoint not found on Sonic API Center."
     });
 });
