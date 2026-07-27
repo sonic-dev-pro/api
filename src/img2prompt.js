@@ -3,17 +3,18 @@
  * 👤 المطور الثانوي: Zyro core (الياس) 🦇
  * 🎯 المشروع: SonicBot-MD v1.8.3
  * 🤖 اسم البوت: ⃟꙰⃢ 𝚂𝙾𝙽𝙸𝙲➥Ᏼᝪᝨ ❯ |‌⃟🇲🇦‌|‌
- * 📝 الوظيفة: تحويل الصورة إلى وصف نصي باستخدام الذكاء الاصطناعي (Image to Prompt)
+ * 📝 الوظيفة: Express API لتوليد وصف للصور (Image 2 Prompt API)
  */
 
 import express from 'express';
 import axios from 'axios';
 import FormData from 'form-data';
+import { fileTypeFromBuffer } from 'file-type';
 
 const router = express.Router();
-const API_URL = 'https://api-nanzz.my.id/docs/api/ai-image/image-2-prompt.php';
+const API_BASE = 'https://engez.a7a.online/api/v1';
 
-// ─── دالة التحقق من صحة الصورة ──────────────────────────────────────────
+// ─── دالة فحص صحة الصورة ────────────────────────────────────────────────
 function isValidImage(buffer) {
     if (!buffer || buffer.length < 100) return false;
     const signatures = [
@@ -24,76 +25,78 @@ function isValidImage(buffer) {
         [0x52, 0x49, 0x46, 0x46], // WEBP
     ];
     const firstBytes = buffer.slice(0, 4);
-    for (const sig of signatures) {
-        if (sig.every((byte, i) => firstBytes[i] === byte)) return true;
-    }
-    return false;
+    return signatures.some(sig => sig.every((byte, i) => firstBytes[i] === byte));
 }
 
-// ─── دالة تحويل الصورة إلى وصف مع إعادة المحاولة ──────────────────────
-async function imageToPromptWithRetry(imageBuffer, fileName, retries = 3) {
-    let lastError = null;
+// ─── رفع الصورة إلى Uguu ──────────────────────────────────────────────
+async function uploadToUguu(buffer, ext) {
+    try {
+        const form = new FormData();
+        form.append('files[]', buffer, `file.${ext}`);
 
-    for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-            console.log(`🔄 محاولة ${attempt} من ${retries}...`);
+        const response = await axios.post('https://uguu.se/upload.php', form, {
+            headers: {
+                ...form.getHeaders(),
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            },
+            timeout: 30000
+        });
 
-            const formData = new FormData();
-            formData.append('file', imageBuffer, { filename: fileName });
-
-            const response = await axios.post(API_URL, formData, {
-                headers: {
-                    ...formData.getHeaders(),
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                },
-                timeout: 120000 // 120 ثانية
-            });
-
-            const data = response.data;
-            console.log('📥 استجابة API:', JSON.stringify(data, null, 2));
-
-            if (data.status === true && data.result) {
-                console.log(`✅ نجحت المحاولة ${attempt}`);
-                return data;
-            }
-
-            throw new Error(data.message || data.error || 'فشل تحليل الصورة');
-
-        } catch (error) {
-            console.error(`❌ محاولة ${attempt} فشلت:`, error.message);
-            lastError = error;
-
-            if (attempt < retries) {
-                await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
-            }
+        if (!response.data?.files?.[0]?.url) {
+            throw new Error('فشل في رفع الصورة إلى سيرفر التخزين المؤقت');
         }
-    }
 
-    throw lastError || new Error('فشلت جميع محاولات تحليل الصورة');
+        return response.data.files[0].url;
+    } catch (error) {
+        throw new Error(`فشل رفع الملف: ${error.message}`);
+    }
+}
+
+// ─── طلب الوصف من السيرفر الأساسي ─────────────────────────────────────
+async function generatePromptFromApi(imageUrl) {
+    try {
+        const params = new URLSearchParams();
+        params.append('imageUrl', imageUrl);
+
+        const response = await axios.get(`${API_BASE}/tools/img2prompt?${params.toString()}`, {
+            timeout: 60000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
+
+        if (!response.data?.success) {
+            throw new Error(response.data?.error || 'فشل معالجة وتوليد وصف الصورة');
+        }
+
+        return response.data.response;
+    } catch (error) {
+        throw new Error(error.response?.data?.error || error.message || 'فشل الاتصال بسيرفر الذكاء الاصطناعي');
+    }
 }
 
 // ─── الـ Endpoint الأساسي ────────────────────────────────────────────────
 router.all('/api/img2prompt', async (req, res) => {
     try {
-        // جلب الرابط من الـ Query Parameters أو من الـ JSON Body
+        // جلب رابط الصورة من query parameter أو body
         const imageUrl = req.query.url || req.body?.url;
 
         if (!imageUrl) {
             return res.status(400).json({
                 status: false,
-                error: 'الرجاء توفير رابط الصورة في الـ parameter باسم (url) لكي يتم تحليلها.',
+                error: 'الرجاء توفير رابط الصورة في الـ parameter باسم (url).',
                 usage_example: '/api/img2prompt?url=https://example.com/image.jpg'
             });
         }
 
-        // 1. تحميل الصورة من الرابط وتحويلها إلى Buffer
+        // 1. تحميل الصورة لتحويلها إلى Buffer والتحقق منها
         let imageBuffer;
         try {
             const imageResponse = await axios.get(imageUrl, {
                 responseType: 'arraybuffer',
-                timeout: 20000 // 20 ثانية كحد أقصى للتحميل
+                timeout: 20000
             });
-            imageBuffer = Buffer.from(imageResponse.data, 'binary');
+            imageBuffer = Buffer.from(imageResponse.data);
         } catch (downloadErr) {
             return res.status(400).json({
                 status: false,
@@ -101,11 +104,11 @@ router.all('/api/img2prompt', async (req, res) => {
             });
         }
 
-        // 2. فحص نوع وحجم الصورة
+        // 2. التحقق من حجم وصحة الصورة
         if (!isValidImage(imageBuffer)) {
             return res.status(400).json({
                 status: false,
-                error: 'الملف الذي تم تحميله ليس صورة صالحة. الصيغ المدعومة: JPG, PNG, GIF, WEBP.'
+                error: 'الملف الموفر ليس صورة صالحة. الصيغ المدعومة: JPG, PNG, GIF, WEBP.'
             });
         }
 
@@ -117,56 +120,41 @@ router.all('/api/img2prompt', async (req, res) => {
             });
         }
 
-        // 3. إرسال طلب المعالجة للـ API الخارجي
-        const fileName = `image_${Date.now()}.jpg`;
-        const apiResult = await imageToPromptWithRetry(imageBuffer, fileName);
+        // 3. استخراج الامتداد ورفع الصورة
+        const fileInfo = await fileTypeFromBuffer(imageBuffer);
+        const ext = fileInfo?.ext || 'jpg';
+        const uploadedUrl = await uploadToUguu(imageBuffer, ext);
 
-        // 4. إرجاع النتيجة بحقوقك بالكامل وبشكل نظيف
+        // 4. استدعاء سيرفر الذكاء الاصطناعي
+        const result = await generatePromptFromApi(uploadedUrl);
+
+        // 5. إرجاع النتيجة بحقوقك
         return res.status(200).json({
             status: true,
-            creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭", // حقوقك الرسمية هنا
+            creator: "ˢᵒⁿⁱⁿᶜ ᴰᵉᵛ 𒉭",
             result: {
-                description: apiResult.result || 'لم يتم العثور على وصف للصورة.',
-                task_id: apiResult.task_id || null
+                arabic: result?.arabic || null,
+                english: result?.english || result?.prompt || null,
+                raw_response: result
             }
         });
 
     } catch (error) {
         console.error('API Process Error:', error);
 
-        let statusCode = 500;
-        let errorMessage = 'حدث خطأ داخلي أثناء معالجة الصورة بالذكاء الاصطناعي.';
-
-        if (error.response) {
-            if (error.response.status === 404) {
-                statusCode = 404;
-                errorMessage = 'رابط الـ API الخارجي غير صحيح أو تم إيقافه مؤقتاً.';
-            } else if (error.response.status === 413) {
-                statusCode = 413;
-                errorMessage = 'حجم الصورة كبير جداً على الخادم الخارجي.';
-            } else if (error.response.status === 429) {
-                statusCode = 429;
-                errorMessage = 'تم تجاوز حد الطلبات المسموح بها مع المزود الخارجي.';
-            }
-        } else if (error.message) {
-            errorMessage = error.message;
-        }
-
-        return res.status(statusCode).json({
+        return res.status(500).json({
             status: false,
-            error: errorMessage
+            error: error.message || 'حدث خطأ داخلي أثناء معالجة الصورة.'
         });
     }
 });
 
-// ─── هيكلية التصدير المنظمة والمتوافقة مع Vercel و ES Modules ───────────
+// ─── هيكلية التصدير المنظمة ومتوافقة مع Vercel و ES Modules ───────────
 export const apiMetadata = {
     path: '/api/img2prompt',
-    name: '𝑺𝑶𝑵𝑰𝑪 𝑫𝑬𝑽⃢҉ ســونـيــڪ (Image to Prompt)',
+    name: '𝑺𝑶𝑵𝑰𝑪 𝑫𝑬𝑽⃢҉ ســونـيــڪ (Image to Prompt API)',
     type: 'AI / Image Analysis',
-    urlExample: '/api/img2prompt?url=https://raw.githubusercontent.com/node-form-data/form-data/master/test/data/example.gif',
-    logo: 'https://whatsapp.com/channel/0029VbCferaKLaHtHkyEVe1z'
+    urlExample: '/api/img2prompt?url=https://raw.githubusercontent.com/node-form-data/form-data/master/test/data/example.gif'
 };
 
-// التصدير الافتراضي المطلوب لـ Vercel Routing
 export default router;
