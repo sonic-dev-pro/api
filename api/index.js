@@ -11,12 +11,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// قائمة بجميع ملفات الـ APIs الموجودة داخل مجلد src (تمت إضافة sono.js)
+// قائمة بجميع ملفات الـ APIs الموجودة داخل مجلد src (تمت إضافة deepseek2.js)
 const apiModules = [
     'deepseek.js',
+    'deepseek2.js', // <-- تمت إضافة deepseek2 هنا
     'imagine.js',
     'suno.js',
-    'sono.js', // <-- تمت إضافة ملف sono الجديد هنا
+    'sono.js',
     'islam-ai.js',
     'morph.js',
     'claude.js',
@@ -59,7 +60,7 @@ await loadRoutes();
 app.get('/api', (req, res) => {
     res.json({
         status: true,
-        creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
+        creator: "ˢᵒⁿⁱⁿᶜ ᴰᵉᵛ 𒉭",
         message: "Sonic API Center Server is Online & System Protected!",
         timestamp: new Date().toISOString()
     });
@@ -69,7 +70,7 @@ app.get('/api', (req, res) => {
 app.use((req, res) => {
     res.status(404).json({
         ok: false,
-        creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
+        creator: "ˢᵒⁿⁱⁿᶜ ᴰᵉᵛ 𒉭",
         error: "Endpoint not found on Sonic API Center."
     });
 });
