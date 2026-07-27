@@ -15,22 +15,23 @@ const BASE_DEEPSEEK_API = 'https://nikai-api-main.vercel.app/api/deepseek';
 // ─── المسار الرئيسي للبوت والملفات المستبعدة ─────────────────────────────
 const BOT_ROOT_DIR = process.cwd();
 
-// مجلدات وملفات ملغاة لتفادي استهلاك التوكينات بالكامل
+// 🛑 ملفات ومجلدات تم استبعادها رسمياً لحماية السيرفر والحدود (Limits)
 const IGNORED_PATHS = [
     'node_modules',
+    'package-lock.json',
     '.git',
     'SonicSessions',
     'SonicJadiBots',
-    'package-lock.json',
     '.npm',
-    'tmp'
+    'tmp',
+    'sessions'
 ];
 
-// الامتدادات البرمجية المسموح بقراءتها
+// 📄 الامتدادات البرمجية المهمة فقط المسموح بقراءتها
 const ALLOWED_EXTENSIONS = ['.js', '.json', '.md'];
 
 /**
- * 📂 دالة قراءة ومسح جميع ملفات البوت البرمجية لتجميع هيكلتها
+ * 📂 دالة قراءة ومسح ملفات البوت البرمجية الأساسية
  */
 function scanBotCode(dir, fileList = {}) {
     try {
@@ -40,7 +41,8 @@ function scanBotCode(dir, fileList = {}) {
             const filePath = path.join(dir, file);
             const relativePath = path.relative(BOT_ROOT_DIR, filePath);
 
-            if (IGNORED_PATHS.some((ignored) => relativePath.startsWith(ignored))) {
+            // إلغاء قراءة الملفات والمجلدات المحددة في الحظر
+            if (IGNORED_PATHS.some((ignored) => relativePath === ignored || relativePath.startsWith(ignored + path.sep))) {
                 continue;
             }
 
@@ -51,7 +53,7 @@ function scanBotCode(dir, fileList = {}) {
             } else {
                 const ext = path.extname(file).toLowerCase();
                 if (ALLOWED_EXTENSIONS.includes(ext)) {
-                    // تجنب الملفات العملاقة فوق 80KB
+                    // تجنب قراءة الملفات الضخمة التي تتجاوز 80KB
                     if (stat.size < 80000) {
                         const content = fs.readFileSync(filePath, 'utf8');
                         fileList[relativePath] = content;
@@ -75,7 +77,7 @@ async function handleDevAIRequest(userQuestion, res) {
             });
         }
 
-        // 1. تجميع أكواد وهيكلة ملفات البوت الحالية
+        // 1. تجميع أكواد وملفات البوت (بدون node_modules و package-lock)
         const projectFiles = scanBotCode(BOT_ROOT_DIR);
         let botContext = `[توجيه أخير وهام جداً للنموذج]:\n`;
         botContext += `أنت الآن مساعد برمجي خبير جداً تم إعدادك خصيصاً بواسطة المطور SONIC DEV (محمد).\n`;
