@@ -75,8 +75,8 @@ async function generatePromptFromApi(imageUrl) {
     }
 }
 
-// ─── الـ Endpoint الأساسي ────────────────────────────────────────────────
-router.all('/api/img2prompt', async (req, res) => {
+// ─── الـ Endpoint الأساسي (يدعم المسارين Vercel + Local Express) ─────────
+router.all(['/api/img2prompt', '/img2prompt'], async (req, res) => {
     try {
         // جلب رابط الصورة من query parameter أو body
         const imageUrl = req.query.url || req.body?.url;
@@ -85,7 +85,7 @@ router.all('/api/img2prompt', async (req, res) => {
             return res.status(400).json({
                 status: false,
                 error: 'الرجاء توفير رابط الصورة في الـ parameter باسم (url).',
-                usage_example: '/api/img2prompt?url=https://example.com/image.jpg'
+                usage_example: 'https://sonic-dev-api.vercel.app/api/img2prompt?url=https://example.com/image.jpg'
             });
         }
 
