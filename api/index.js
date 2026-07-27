@@ -11,16 +11,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// قائمة بجميع ملفات الـ APIs الموجودة داخل مجلد src (تمت إضافة claude2.js و simsimi.js)
+// قائمة بجميع ملفات الـ APIs الموجودة داخل مجلد src (تمت إضافة sono.js)
 const apiModules = [
     'deepseek.js',
     'imagine.js',
     'suno.js',
+    'sono.js', // <-- تمت إضافة ملف sono الجديد هنا
     'islam-ai.js',
     'morph.js',
     'claude.js',
     'claude2.js',
-    'simsimi.js', // <-- تمت إضافة سمسمي هنا
+    'simsimi.js',
     'gemini.js',
     'stalkchannel.js',
     'instagram.js',
