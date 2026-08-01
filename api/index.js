@@ -42,13 +42,13 @@ const apiModules = [
 async function loadRoutes() {
     for (const file of apiModules) {
         try {
-            const module = await import(`../src/${file}`);
+            const module = await import(`./src/${file}`);
             if (module && module.default) {
                 app.use(module.default);
                 console.log(`[Sonic API] Loaded successfully: ${file}`);
             }
         } catch (error) {
-            console.warn(`[Sonic API Warning] Could not load ../src/${file}:`, error.message);
+            console.warn(`[Sonic API Warning] Could not load ./src/${file}:`, error.message);
         }
     }
 }
@@ -58,7 +58,7 @@ await loadRoutes();
 app.get('/api', (req, res) => {
     res.json({
         status: true,
-        creator: "ˢᵒⁿⁱⁿᶜ ᴰᵉᵛ 𒉭",
+        creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
         message: "Sonic API Center Server is Online & System Protected!",
         timestamp: new Date().toISOString()
     });
@@ -67,7 +67,7 @@ app.get('/api', (req, res) => {
 app.use((req, res) => {
     res.status(404).json({
         ok: false,
-        creator: "ˢᵒⁿⁱⁿᶜ ᴰᵉᵛ 𒉭",
+        creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
         error: "Endpoint not found on Sonic API Center."
     });
 });
