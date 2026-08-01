@@ -1,167 +1,340 @@
 /*▲ حـقـوق الـتـطـويـر والـتـعـديـل ▲
- * 👤 المطور الوحيد: محمد (SONIC DEV) 🇲🇦
- * 🎯 المشروع: SonicBot-MD
- * 📝 الوظيفة: YouTube Downloader API (استخراج روابط تحميل اليوتيوب بجودة عالية)
- * حقوق التطوير محفوظة بالكامل
+ * 👤 المالك والمطور الوحيد: 𝑺𝑶𝑵𝑰𝑪 𝑫𝑬𝑽⃢҉ ســونـيــك (محمد)
+ * 🎯 المشروع: Sonic API Center
+ * 📝 الوظيفة: YouTube Downloader & Search Router (Multi-Server Fallback Engine)
  */
 
 import express from 'express';
 import axios from 'axios';
+import fs from 'fs/promises';
+import { createWriteStream } from 'fs';
+import os from 'os';
+import path from 'path';
+import crypto from 'crypto';
+import { spawn } from 'child_process';
+import { pipeline } from 'stream/promises';
 
 const router = express.Router();
 
-// دالة تأخير بسيطة
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const API_BASE = 'https://engez.a7a.online/api/v1';
+const YT_SEARCH = `${API_BASE}/search/youtube`;
+const YT_DOWNLOAD_V2 = `${API_BASE}/download/youtubev2`;
+const YT_DOWNLOAD_NEW = `${API_BASE}/download/ytdl`;
+const YT_DOWNLOAD_OLD = `${API_BASE}/download/youtube`;
 
-// ─── الدالة الأساسية لمعالجة وتحميل الفيديو ──────────────────────────────
-async function handleDownload(url, res) {
+const DOWNLOAD_TIMEOUT_MS = 120 * 1000;
+
+// ─── الدوال المساعدة لتنسيق واستخراج البيانات ──────────────────────────
+function normalizeDownloadUrl(value) {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    return /^https?:\/\//i.test(trimmed) ? trimmed : null;
+}
+
+function normalizePayload(payload) {
+    return {
+        title: payload?.title || null,
+        thumbnail: payload?.thumbnail || null,
+        download_url: normalizeDownloadUrl(payload?.download_url || payload?.downloadUrl),
+        type: payload?.type === 'audio' || payload?.type === 'mp3' ? 'audio' : 'mp4',
+        requested_quality: payload?.requested_quality || payload?.quality || null,
+        file_size_bytes: payload?.file_size_bytes || payload?.fileSizeBytes || null,
+        source_used: payload?.source_used || payload?.source || 'unknown',
+        is_fallback: Boolean(payload?.is_fallback)
+    };
+}
+
+// ─── محركات التحميل والبحث ───────────────────────────────────────────
+async function searchYouTube(query) {
+    const params = new URLSearchParams({ q: query });
+    const response = await axios.get(`${YT_SEARCH}?${params.toString()}`, {
+        timeout: 30000
+    });
+
+    if (!response.data?.success) {
+        throw new Error(response.data?.error || 'لم يتم العثور على نتائج للبحث.');
+    }
+
+    return response.data.results || [];
+}
+
+async function fetchFromV2(url, type) {
+    const params = new URLSearchParams({ url, type });
+    const { data } = await axios.get(`${YT_DOWNLOAD_V2}?${params.toString()}`, {
+        timeout: DOWNLOAD_TIMEOUT_MS
+    });
+
+    if (!data?.success || !data.response) {
+        throw new Error(data?.error || 'فشل خادم التحميل السريع (V2).');
+    }
+
+    const r = data.response;
+    const payload = normalizePayload({
+        title: r.title,
+        thumbnail: r.thumbnail,
+        download_url: r.download_url || r.downloadUrl,
+        type: r.type,
+        requested_quality: r.requested_quality || r.quality,
+        file_size_bytes: r.file_size_bytes || r.fileSizeBytes,
+        source_used: r.source || 'youtubev2'
+    });
+
+    if (!payload.download_url) throw new Error('الرابط المسترجع غير صالح.');
+    return payload;
+}
+
+async function fetchFromNewApi(url, type, quality) {
+    const params = new URLSearchParams({ url });
+    if (type) params.set('type', type);
+    if (quality) params.set('quality', quality);
+
+    const { data } = await axios.get(`${YT_DOWNLOAD_NEW}?${params.toString()}`, {
+        timeout: DOWNLOAD_TIMEOUT_MS
+    });
+
+    if (!data?.success || !data.response) {
+        throw new Error(data?.error || 'فشل المصدر الأول (ytdl).');
+    }
+
+    const r = data.response;
+    const payload = normalizePayload({
+        title: r.title,
+        thumbnail: r.thumbnail,
+        download_url: r.download_url || r.downloadUrl,
+        type: r.type,
+        requested_quality: r.requested_quality || r.quality || quality,
+        file_size_bytes: r.file_size_bytes || r.fileSizeBytes,
+        source_used: r.source || 'ytdl'
+    });
+
+    if (!payload.download_url) throw new Error('رابط المصدر الأول غير صالح.');
+    return payload;
+}
+
+async function fetchFromOldApi(url, type, quality) {
+    const params = new URLSearchParams({ url });
+    if (type) params.set('type', type);
+    if (quality) params.set('quality', quality);
+
+    const { data } = await axios.get(`${YT_DOWNLOAD_OLD}?${params.toString()}`, {
+        timeout: DOWNLOAD_TIMEOUT_MS
+    });
+
+    if (!data?.success) {
+        throw new Error(data?.error || 'فشل المصدر الاحتياطي (youtube).');
+    }
+
+    const d = data.data || data.response || {};
+    const payload = normalizePayload({
+        title: d.title,
+        thumbnail: d.thumbnail,
+        download_url: d.download_url || d.downloadUrl,
+        type: d.type,
+        requested_quality: d.requested_quality || d.quality || quality,
+        file_size_bytes: d.file_size_bytes || d.fileSizeBytes,
+        source_used: d.source || 'youtube',
+        is_fallback: true
+    });
+
+    if (!payload.download_url) throw new Error('رابط المصدر الاحتياطي غير صالح.');
+    return payload;
+}
+
+async function fetchFromFallbackChain(url, type, quality) {
     try {
-        // التحقق من وجود وصحة الرابط
-        if (!url) {
-            return res.status(400).json({
-                success: false,
-                error: 'يجب توفير معامل url (مثال: ?url=https://youtube.com/watch?v=...)'
-            });
+        return await fetchFromNewApi(url, type, quality);
+    } catch (e) {
+        return await fetchFromOldApi(url, type, quality);
+    }
+}
+
+// ─── أدوات المعالجة والتنزيل المباشر المتقدم ────────────────────────────
+async function downloadToFile(fileUrl, filePath) {
+    const safeUrl = normalizeDownloadUrl(fileUrl);
+    if (!safeUrl) throw new Error('رابط التحميل غير صالح.');
+
+    const response = await axios.get(safeUrl, {
+        responseType: 'stream',
+        timeout: DOWNLOAD_TIMEOUT_MS,
+        maxRedirects: 5,
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+            Accept: '*/*',
+            'Accept-Language': 'en-US,en;q=0.9'
         }
+    });
 
-        if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
-            return res.status(400).json({
-                success: false,
-                error: 'الرابط يجب أن يكون من YouTube'
-            });
-        }
+    await pipeline(response.data, createWriteStream(filePath));
+}
 
-        // استخدام API بديل أولاً (أكثر استقراراً)
-        try {
-            const response = await axios.get(`https://api.tubemp3.cc/convert?url=${encodeURIComponent(url)}`, {
-                timeout: 15000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                }
-            });
-
-            if (response.data && response.data.url) {
-                return res.json({
-                    success: true,
-                    creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-                    data: {
-                        title: response.data.title || 'YouTube Video',
-                        downloadUrl: response.data.url,
-                        quality: '1080p',
-                        format: 'mp4'
-                    },
-                    meta: {
-                        timestamp: new Date().toISOString()
-                    }
-                });
-            }
-        } catch (e) {
-            console.log('Fallback API failed, trying main API...');
-        }
-
-        // الـ API الرئيسي (ytdl.convert1s.com)
-        const requestData = {
-            url: url,
-            output: {
-                type: "video",
-                format: "mp4",
-                quality: "1080p"
-            }
-        };
-
-        const response = await axios.post('https://ytdl.convert1s.com/api/v2/download', requestData, {
-            headers: {
-                'accept': 'application/json',
-                'content-type': 'application/json',
-                'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36'
-            },
-            timeout: 25000
+function runFfmpeg(args) {
+    return new Promise((resolve, reject) => {
+        const ff = spawn('ffmpeg', args, { stdio: ['ignore', 'ignore', 'pipe'] });
+        let err = '';
+        ff.stderr.on('data', (chunk) => { err += chunk.toString(); });
+        ff.on('error', reject);
+        ff.on('close', (code) => {
+            if (code === 0) return resolve();
+            reject(new Error(`FFmpeg Exited Code ${code}: ${err}`));
         });
+    });
+}
 
-        const resData = response.data;
+async function prepareMediaFile(payload) {
+    const safePayload = normalizePayload(payload);
+    if (!safePayload.download_url) throw new Error('API لم ترجع رابط تحميل صالح');
 
-        if (!resData.statusUrl) {
-            throw new Error('فشل السيرفر في توليد رابط الفحص');
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ytdl-api-'));
+    const id = crypto.randomBytes(6).toString('hex');
+
+    const srcPath = path.join(tmpDir, `source-${id}.bin`);
+    const videoPath = path.join(tmpDir, `video-${id}.mp4`);
+    const audioPath = path.join(tmpDir, `audio-${id}.mp3`);
+
+    await downloadToFile(safePayload.download_url, srcPath);
+
+    const isVideo = safePayload.type === 'mp4';
+
+    if (isVideo) {
+        try {
+            await runFfmpeg([
+                '-y', '-i', srcPath,
+                '-fflags', '+genpts',
+                '-movflags', '+faststart',
+                '-c:v', 'libx264',
+                '-preset', 'veryfast',
+                '-crf', '23',
+                '-c:a', 'aac',
+                '-b:a', '128k',
+                '-pix_fmt', 'yuv420p',
+                videoPath
+            ]);
+            return { filePath: videoPath, tmpDir, mimetype: 'video/mp4', filename: `${safePayload.title || 'video'}.mp4` };
+        } catch (e) {
+            return { filePath: srcPath, tmpDir, mimetype: 'video/mp4', filename: `${safePayload.title || 'video'}.mp4` };
         }
+    }
 
-        const statusUrl = resData.statusUrl;
-        let downloadUrl = null;
-        let videoTitle = resData.title || 'YouTube Video';
-        let attempts = 0;
-        const maxAttempts = 8; // تقليل عدد المحاولات لتفادي انتهاء وقت الـ Serverless في Vercel (10s/60s)
+    try {
+        await runFfmpeg([
+            '-y', '-i', srcPath,
+            '-vn',
+            '-c:a', 'libmp3lame',
+            '-b:a', '192k',
+            audioPath
+        ]);
+        return { filePath: audioPath, tmpDir, mimetype: 'audio/mpeg', filename: `${safePayload.title || 'audio'}.mp3` };
+    } catch (e) {
+        return { filePath: srcPath, tmpDir, mimetype: 'audio/mpeg', filename: `${safePayload.title || 'audio'}.mp3` };
+    }
+}
 
-        while (attempts < maxAttempts) {
-            await sleep(2000);
-            attempts++;
+// ─── API Routes Handlers ──────────────────────────────────────────────
 
-            try {
-                const statusCheck = await axios.get(statusUrl, {
-                    headers: { 'user-agent': 'Mozilla/5.0' },
-                    timeout: 10000
-                });
-                const statusData = statusCheck.data;
+// 1. بحث يوتيوب
+async function handleSearch(req, res) {
+    const q = req.query.q || req.query.query || req.body?.q || req.body?.query;
+    if (!q) {
+        return res.status(400).json({ ok: false, creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭", error: "يرجى كتابة نص للبحث عبر المعامل q." });
+    }
 
-                if (statusData.status === 'completed' && statusData.downloadUrl) {
-                    downloadUrl = statusData.downloadUrl;
-                    videoTitle = statusData.title || videoTitle;
-                    break;
-                } else if (statusData.status === 'failed') {
-                    throw new Error('فشل خادم التحميل في معالجة هذا المقطع');
-                }
-            } catch (pollError) {
-                if (attempts >= maxAttempts) {
-                    throw new Error('انتهى وقت الانتظار للتحويل بالتتبع المباشر');
-                }
-            }
-        }
-
-        if (!downloadUrl) {
-            throw new Error('استغرق السيرفر وقتاً طويلاً، حاول لاحقاً');
-        }
-
-        return res.json({
-            success: true,
+    try {
+        const results = await searchYouTube(q);
+        return res.status(200).json({
+            ok: true,
             creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-            data: {
-                title: videoTitle,
-                downloadUrl: downloadUrl,
-                quality: '1080p',
-                format: 'mp4'
-            },
-            meta: {
-                timestamp: new Date().toISOString()
+            query: q,
+            count: results.length,
+            results: results
+        });
+    } catch (error) {
+        return res.status(500).json({ ok: false, creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭", error: error.message });
+    }
+}
+
+// 2. الحصول على رابط التحميل (JSON Payload)
+async function handleDownloadInfo(req, res) {
+    const url = req.query.url || req.body?.url;
+    const type = req.query.type || req.body?.type || 'mp4'; // mp4 or audio/mp3
+    const quality = req.query.quality || req.body?.quality;
+    const engine = req.query.engine || req.body?.engine || 'v2'; // v2 or fallback
+
+    if (!url) {
+        return res.status(400).json({ ok: false, creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭", error: "يرجى توفير رابط يوتيوب عبر المعامل url." });
+    }
+
+    try {
+        let payload;
+        if (engine === 'v2') {
+            payload = await fetchFromV2(url, type);
+        } else {
+            payload = await fetchFromFallbackChain(url, type, quality);
+        }
+
+        return res.status(200).json({
+            ok: true,
+            creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
+            result: payload
+        });
+    } catch (error) {
+        return res.status(500).json({ ok: false, creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭", error: error.message });
+    }
+}
+
+// 3. التحميل المباشر للفيلم/الصوت (Direct Stream Engine)
+async function handleDirectStream(req, res) {
+    const url = req.query.url || req.body?.url;
+    const type = req.query.type || req.body?.type || 'mp4';
+    const quality = req.query.quality || req.body?.quality;
+
+    if (!url) {
+        return res.status(400).json({ ok: false, creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭", error: "يرجى توفير رابط يوتيوب عبر المعامل url." });
+    }
+
+    let preparedData = null;
+    try {
+        let payload;
+        try {
+            payload = await fetchFromV2(url, type);
+        } catch {
+            payload = await fetchFromFallbackChain(url, type, quality);
+        }
+
+        preparedData = await prepareMediaFile(payload);
+
+        res.setHeader('Content-Type', preparedData.mimetype);
+        res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(preparedData.filename)}"`);
+
+        return res.sendFile(preparedData.filePath, async (err) => {
+            if (preparedData?.tmpDir) {
+                await fs.rm(preparedData.tmpDir, { recursive: true, force: true }).catch(() => {});
             }
         });
 
     } catch (error) {
-        console.error('YouTube Error:', error.message);
-        return res.status(500).json({
-            success: false,
-            creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-            error: error.message || 'حدث خطأ داخلي في الخادم'
-        });
+        if (preparedData?.tmpDir) {
+            await fs.rm(preparedData.tmpDir, { recursive: true, force: true }).catch(() => {});
+        }
+        return res.status(500).json({ ok: false, creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭", error: error.message });
     }
 }
 
-// ─── Endpoint GET ─────────────────────────────────────────────────────
-router.get('/api/youtube', async (req, res) => {
-    const url = req.query.url;
-    await handleDownload(url, res);
-});
+// ─── Endpoints ────────────────────────────────────────────────────────
+router.get('/api/youtube/search', handleSearch);
+router.post('/api/youtube/search', handleSearch);
 
-// ─── Endpoint POST ────────────────────────────────────────────────────
-router.post('/api/youtube', async (req, res) => {
-    const { url } = req.body || {};
-    await handleDownload(url, res);
-});
+router.get('/api/youtube/download', handleDownloadInfo);
+router.post('/api/youtube/download', handleDownloadInfo);
 
-// ─── هيكلية التصدير المنظمة والمتوافقة مع Vercel و ES Modules ───────────
+router.get('/api/youtube/stream', handleDirectStream);
+router.post('/api/youtube/stream', handleDirectStream);
+
 export const apiMetadata = {
     path: '/api/youtube',
-    name: 'YouTube Downloader API',
-    type: 'downloader',
-    urlExample: '/api/youtube?url=https://youtube.com/watch?v=...',
-    logo: 'https://i.imgur.com/youtube-logo.png'
+    name: 'Sonic YouTube Downloader & Search Engine',
+    type: 'downloader / youtube',
+    urlExample: '/api/youtube/download?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ&type=audio'
 };
 
 export default router;
