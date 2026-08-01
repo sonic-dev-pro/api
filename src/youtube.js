@@ -1,7 +1,7 @@
 /*▲ حـقـوق الـتـطـويـر والـتـعـديـل ▲
  * 👤 المالك والمطور الوحيد: 𝑺𝑶𝑵𝑰𝑪 𝑫𝑬𝑽⃢҉ ســونـيــك (محمد)
  * 🎯 المشروع: Sonic API Center
- * 📝 الوظيفة: YouTube Downloader & Search Engine
+ * 📝 الوظيفة: Smart YouTube Downloader & Search Router
  */
 
 import express from 'express';
@@ -13,19 +13,10 @@ const API_BASE = 'https://engez.a7a.online/api/v1';
 const YT_SEARCH = `${API_BASE}/search/youtube`;
 const YT_DOWNLOAD_V2 = `${API_BASE}/download/youtubev2`;
 const YT_DOWNLOAD_NEW = `${API_BASE}/download/ytdl`;
-const YT_DOWNLOAD_OLD = `${API_BASE}/download/youtube`;
 
-// ─── Search Function ──────────────────────────────────────────────────
+// ─── Search Engine ──────────────────────────────────────────────────
 async function handleSearchRequest(query, res) {
     try {
-        if (!query || typeof query !== 'string' || !query.trim()) {
-            return res.status(400).json({
-                ok: false,
-                creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-                error: "يرجى توفير كلمة البحث عبر معامل q أو query."
-            });
-        }
-
         const params = new URLSearchParams({ q: query.trim() });
         const response = await axios.get(`${YT_SEARCH}?${params.toString()}`, { timeout: 25000 });
         const data = response.data;
@@ -34,6 +25,7 @@ async function handleSearchRequest(query, res) {
             return res.status(200).json({
                 ok: true,
                 creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
+                action: "search",
                 query: query,
                 count: data.results.length,
                 results: data.results
@@ -45,7 +37,6 @@ async function handleSearchRequest(query, res) {
                 error: data?.error || "تعذر الحصول على نتائج من سيرفر البحث."
             });
         }
-
     } catch (error) {
         console.error('YouTube Search API Error:', error.message);
         return res.status(500).json({
@@ -57,20 +48,11 @@ async function handleSearchRequest(query, res) {
     }
 }
 
-// ─── Download Function ────────────────────────────────────────────────
+// ─── Download Engine ────────────────────────────────────────────────
 async function handleDownloadRequest(url, type, quality, res) {
     try {
-        if (!url || typeof url !== 'string' || !url.trim()) {
-            return res.status(400).json({
-                ok: false,
-                creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-                error: "يرجى توفير رابط الفيديو عبر معامل url."
-            });
-        }
-
         const downloadType = type === 'audio' || type === 'mp3' ? 'audio' : 'mp4';
         
-        // المحاولة 1: V2 API
         try {
             const params = new URLSearchParams({ url: url.trim(), type: downloadType });
             const response = await axios.get(`${YT_DOWNLOAD_V2}?${params.toString()}`, { timeout: 30000 });
@@ -79,6 +61,7 @@ async function handleDownloadRequest(url, type, quality, res) {
                 return res.status(200).json({
                     ok: true,
                     creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
+                    action: "download",
                     model: "YouTube Downloader V2",
                     result: response.data.response
                 });
@@ -87,7 +70,6 @@ async function handleDownloadRequest(url, type, quality, res) {
             console.warn('V2 Engine failed, trying fallback...', v2Err.message);
         }
 
-        // المحاولة 2: Fallback Engine
         const fallbackParams = new URLSearchParams({ url: url.trim() });
         if (downloadType) fallbackParams.set('type', downloadType);
         if (quality) fallbackParams.set('quality', quality);
@@ -98,6 +80,7 @@ async function handleDownloadRequest(url, type, quality, res) {
             return res.status(200).json({
                 ok: true,
                 creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
+                action: "download",
                 model: "YouTube Downloader Fallback",
                 result: fbResponse.data.response
             });
@@ -108,7 +91,6 @@ async function handleDownloadRequest(url, type, quality, res) {
             creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
             error: "جميع سيرفرات التحميل متوقفة حالياً، حاول مجدداً لاحقاً."
         });
-
     } catch (error) {
         console.error('YouTube Download API Error:', error.message);
         return res.status(500).json({
@@ -120,50 +102,46 @@ async function handleDownloadRequest(url, type, quality, res) {
     }
 }
 
-// ─── Endpoints ────────────────────────────────────────────────────────
+// ─── Smart Router Control ───────────────────────────────────────────
+async function processYouTubeRequest(req, res) {
+    const query = req.query.q || req.query.query || req.body?.q || req.body?.query;
+    const url = req.query.url || req.body?.url;
+    const type = req.query.type || req.body?.type;
+    const quality = req.query.quality || req.body?.quality;
 
-// Main Info Endpoint
-router.get('/api/youtube', (req, res) => {
-    res.json({
-        ok: true,
+    // 1. إذا تمرر رابط فسيتم التنزيل فوراً
+    if (url) {
+        return await handleDownloadRequest(url, type, quality, res);
+    }
+
+    // 2. إذا تمررت كلمة بحث فسيتم البحث فوراً
+    if (query) {
+        return await handleSearchRequest(query, res);
+    }
+
+    // 3. إذا لم يمرر شيء يظهر الدليل المساعد
+    return res.status(400).json({
+        ok: false,
         creator: "ˢᵒⁿⁱᶜ ᴰᵉᵛ 𒉭",
-        message: "Sonic YouTube API Center is Online!",
-        endpoints: {
-            search: "/api/youtube/search?q=query",
-            download: "/api/youtube/download?url=yt_url&type=mp4|audio"
+        message: "Sonic YouTube API Center - Smart Endpoint",
+        usage: {
+            search_example: "/api/youtube?q=sonic",
+            download_example: "/api/youtube?url=https://youtube.com/watch?v=xxx&type=mp4"
         }
     });
-});
+}
 
-// Search Endpoints
-router.get('/api/youtube/search', async (req, res) => {
-    const q = req.query.q || req.query.query;
-    await handleSearchRequest(q, res);
-});
+// Support both Express Router paths (/youtube and /api/youtube)
+const targetPaths = ['/youtube', '/api/youtube', '/youtube/search', '/api/youtube/search', '/youtube/download', '/api/youtube/download'];
 
-router.post('/api/youtube/search', async (req, res) => {
-    const { q, query } = req.body || {};
-    await handleSearchRequest(q || query, res);
-});
-
-// Download Endpoints
-router.get('/api/youtube/download', async (req, res) => {
-    const url = req.query.url;
-    const type = req.query.type;
-    const quality = req.query.quality;
-    await handleDownloadRequest(url, type, quality, res);
-});
-
-router.post('/api/youtube/download', async (req, res) => {
-    const { url, type, quality } = req.body || {};
-    await handleDownloadRequest(url, type, quality, res);
-});
+router.get(targetPaths, processYouTubeRequest);
+router.post(targetPaths, processYouTubeRequest);
 
 export const apiMetadata = {
     path: '/api/youtube',
-    name: 'YouTube Search & Downloader (Sonic Edition)',
-    type: 'downloader / youtube',
-    urlExample: '/api/youtube/search?q=sonic'
+    name: 'YouTube Smart API (Sonic Edition)',
+    type: 'downloader / search',
+    urlExample: '/api/youtube?q=sonic'
 };
 
 export default router;
